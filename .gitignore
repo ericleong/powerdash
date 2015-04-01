@@ -1,0 +1,26 @@
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+log.txt
+
+npm-debug.log
+node_modules
+npm-shrinkwrap.json
+
+# IDE Settings
+.settings
+.project
+*.sublime-project
+*.sublime-workspace
+
+# Secrets!
+auth.json

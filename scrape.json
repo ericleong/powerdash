@@ -1,0 +1,96 @@
+[
+  {
+    "type": "ntlm",
+    "delay": 15,
+    "dgm": "x-pml:/diagrams/ud/41cooper.dgm",
+    "desired": [
+      "SRV1PKW",
+      "SV2PKW",
+      "Total KW"
+    ]
+  },
+  {
+    "name": "elevator",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41elevator.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "3rd floor lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 rt.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "3rd floor lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/413tl.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "4th floor lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/414tl.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "6th floor lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/416fltl.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "7th floor lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/417fltl.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "roof mechanical",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 rdhm.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "sub-cellar power and lighting",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 5-dh.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "cellar power and lighting",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 cdh.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "4th floor mechanical 2nd,3rd,5th lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 4-dh.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "7th floor mechanical, 8th and 9th lighting and plugs",
+    "type": "ntlm",
+    "delay": 30,
+    "dgm": "x-pml:/diagrams/ud/41cooper/41 7-dh.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
+    "name": "rain water harvesting",
+    "type": "ntlm",
+    "delay": 15,
+    "dgm": "x-pml:/diagrams/ud/41cooper/greywater.dgm",
+    "node": "COOPER.41COOPERSQ"
+  }
+]

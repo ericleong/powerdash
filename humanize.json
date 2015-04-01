@@ -1,0 +1,20 @@
+{
+  "Total KW": "Utility Subtotal",
+  "SRV1PKW": "Utility Service 1",
+  "SV2PKW": "Utility Service 2",
+  "SRV1KW": "Utility Service 1",
+  "SV2KW": "Utility Service 2",
+  "SATEC17KW": "Retail",
+  "SATEC12KW": "3rd fl lights",
+  "SATEC13KW": "4th fl lights",
+  "SATEC14KW": "6th fl lights",
+  "SATEC15KW": "7th fl lights",
+  "SATEC18KW": "Roof & mechanical",
+  "SATEC19KW": "LL2 power & lights",
+  "SATEC110KW": "LL1 power & lights",
+  "SATEC111KW": "4 fl mech. 2+3+5 fl lights",
+  "SATEC112KW": "7 fl mech. 8+9 lights",
+  "SATEC11KW": "Elevators",
+  "kW Production": "Cogen Production",
+  "ART9 Result 1": "Water Saved"
+}

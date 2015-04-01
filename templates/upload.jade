@@ -1,0 +1,16 @@
+doctype
+html
+	head
+		include includes/head
+	body
+		h1 upload
+		form(action='/upload', method='post', enctype='multipart/form-data')
+			input(type='text', name='collection')
+			input(type='file', name='csv')
+			input(type='submit')
+
+		if file && dgm
+			p uploaded #{file} into #{dgm}
+
+		if error
+			p #{error}

@@ -1,0 +1,35 @@
+{
+  "name": "energydash",
+  "version": "0.0.0-24",
+  "description": "a real time energy dashboard",
+  "main": "app.js",
+  "dependencies": {
+    "async": "^0.2.10",
+    "bufferlist": "^0.1.0",
+    "express": "^3.20.2",
+    "jade": "^1.1.5",
+    "moment": "^2.8.2",
+    "moment-timezone": "^0.3.1",
+    "mongodb": "^1.4.35",
+    "ntlm-auth": "^0.1.0",
+    "put": "0.0.6",
+    "socket.io": "^0.9.17",
+    "stream-stack": "~1.1.4",
+    "xml2js": "^0.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./app.js"
+  },
+  "keywords": [
+    "energy",
+    "dashboard"
+  ],
+  "author": "leong@cooper.edu",
+  "license": "MIT",
+  "subdomain": "energydash",
+  "engines": {
+    "node": "0.12.x"
+  }
+}

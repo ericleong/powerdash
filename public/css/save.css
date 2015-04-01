@@ -1,0 +1,50 @@
+html, body {
+	padding: 0px;
+	margin: 0px;
+
+	height: 100%;
+	width: 100%;
+}
+
+.container {
+	background-image: url('../images/bucket.jpg');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+
+	height: 100%;
+	width: 100%;
+
+	text-align: center;
+
+	margin-left: auto;
+	margin-right: auto;
+
+	vertical-align: middle;
+}
+
+h1#amount {
+	font-family: 'Slabo 13px', serif;
+	font-size: 36pt;
+	font-weight: 400;
+
+	padding: 0px;
+	margin: 0px;
+
+	position: relative;
+	top: 50%;
+	transform: translateY(-60%);
+}
+
+@media (max-width: 200px) {
+	h1#amount {
+		font-size: 24pt;
+		transform: translateY(-70%);
+	}
+}
+@media (max-height: 200px) {
+	h1#amount {
+		font-size: 24pt;
+		transform: translateY(-70%);
+	}
+}
