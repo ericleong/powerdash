@@ -474,7 +474,13 @@ io.sockets.on('connection', function(socket) {
 	});
 });
 
-var auth = require('./auth.json');
+var auth;
+if (app.get('env') == 'production' && process.env.AUTH) {
+	auth = JSON.parse(process.env.AUTH);
+} else {
+	auth = require('./auth.json');
+}
+
 var scrapeList = require('./scrape.json');
 
 if (auth) {

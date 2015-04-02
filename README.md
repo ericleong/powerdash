@@ -30,8 +30,14 @@ The server's domain is needed for `socket.io`. The default domain is `localhost:
 
 #### Retreiving Data
 
-To retrieve data, create a file named `auth.json` in the root of the repository in this format:
-```
+To retrieve data, either:
+
+* Set the environment variable `NODE_ENV` to `production` and create an environment variable named `AUTH` with a json string with the data below.
+* Create a file named `auth.json` in the root of the repository with the data below.
+
+The format of the file or string must be:
+
+```JSON
 {
   "modbus": {
     "name": "<modbus server name>",
