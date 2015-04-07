@@ -5,7 +5,8 @@ var ntlmRequest = require('ntlm-auth').ntlmRequest,
 	parseString = require('xml2js').parseString,
 	getLatest = require('./api.js').getLatest,
 	cleanDGM = require('./utils.js').cleanDGM,
-	async = require('async');
+	async = require('async'),
+	util = require('util');
 
 var mongourl = mongo.getMongoUrl();
 
@@ -125,8 +126,7 @@ function storeNtlmData(dgm, items, timestamp) {
 }
 
 function pollNtlm(options, auth, type1_msg, io, dgm, node, desired) {
-	node = node === undefined ? 'COOPER.41COOPERSQ' : node;
-	
+
 	var reqBody = "{'dgm':'" + dgm + "','id':'','node':'";
 	if (node) {
 		reqBody += node;
@@ -149,39 +149,43 @@ function pollNtlm(options, auth, type1_msg, io, dgm, node, desired) {
 					try {
 						var obj = JSON.parse(body);
 						
-						parseString(obj['d'], function(err, result) {
-							if (result.DiagramInput === undefined || err) {
-								console.error('Error parsing data for: ' + dgm);
-							} else {
-								getLatest(dgm, function(latestItem) {
-									var lastSavedAt = result.DiagramInput['$'].savedAt;
+						if (obj && obj['d'] && obj['d'].length > 0) {
+							parseString(obj['d'], function(err, result) {
+								if (result.DiagramInput === undefined || err) {
+									console.error('Error parsing data for: ' + dgm);
+								} else {
+									getLatest(dgm, function(latestItem) {
+										var lastSavedAt = result.DiagramInput['$'].savedAt;
 
-									// retrieved times are in new york time
-									// make sure to convert to milliseconds
-									var lastSavedAtTimestamp = parseInt(moment.tz(lastSavedAt, 'America/New_York').format('X'), 10) * 1000;
+										// retrieved times are in new york time
+										// make sure to convert to milliseconds
+										var lastSavedAtTimestamp = parseInt(moment.tz(lastSavedAt, 'America/New_York').format('X'), 10) * 1000;
 
-									if (lastSavedAtTimestamp && (latestItem === undefined || lastSavedAtTimestamp > latestItem.time.getTime())) { // defensive
-										// print time that the data was saved at
-										console.log(dgm + ' @ ' + lastSavedAt);
-										
-										for (var i in result.DiagramInput.Items) {
-											var item = result.DiagramInput.Items[i];
-											if (item['$'].status == 'succeeded') {
-												var lastItem = simplifyNtlmItems(item.Item, lastSavedAtTimestamp / 1000, desired);
+										if (lastSavedAtTimestamp && (latestItem === undefined || lastSavedAtTimestamp > latestItem.time.getTime())) { // defensive
+											// print time that the data was saved at
+											console.log(dgm + ' @ ' + lastSavedAt);
+											
+											for (var i in result.DiagramInput.Items) {
+												var item = result.DiagramInput.Items[i];
+												if (item['$'].status == 'succeeded') {
+													var lastItem = simplifyNtlmItems(item.Item, lastSavedAtTimestamp / 1000, desired);
 
-												storeNtlmData(dgm, item.Item, lastSavedAtTimestamp);
-												storeNtlmMeta(dgm, item.Item);
+													storeNtlmData(dgm, item.Item, lastSavedAtTimestamp);
+													storeNtlmMeta(dgm, item.Item);
 
-												if (io) {
-													io.sockets.in(dgm).emit('update', lastItem);
+													if (io) {
+														io.sockets.in(dgm).emit('update', lastItem);
+													}
 												}
 											}
 										}
-									}
-									
-								});
-							}
-						});						
+										
+									});
+								}
+							});
+						} else {
+							console.warn('Bad response: ' + util.inspect(obj));
+						}
 					} catch (err) {
 						console.warn('parse error when polling: ' + dgm);
 						console.warn(err.stack);

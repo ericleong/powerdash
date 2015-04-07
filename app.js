@@ -485,10 +485,12 @@ var scrapeList = require('./scrape.json');
 
 if (auth) {
 	for (var i = 0; i < 1; i++) {
-		if (scrapeList[i].type == "ntlm") {
+		if (scrapeList[i].type == 'ntlm') {
 			setInterval(scrape.pollNtlm, scrapeList[i].delay * 1000, auth.ntlm.request, auth.ntlm.auth, auth.ntlm.type1_msg, io, scrapeList[i].dgm, scrapeList[i].node, scrapeList[i].desired);
-		} else if (scrapeList[i].type == "modbus") {
+		} else if (scrapeList[i].type == 'modbus') {
 			setInterval(scrape.pollModbus, scrapeList[i].delay * 1000, auth.modbus.name, auth.modbus.ip, io);
 		}
 	}
+} else {
+	console.error('Could not find auth.json or AUTH environment variable.')
 }
