@@ -81,10 +81,10 @@ $('#download').click(function() {
 
 	if (!$('#pause').data('paused')) {
 
-		window.location.href = '/recent/csv?' + all + 'dgm=' + pointsList + '&elapsed=' + elapsed;
+		window.location.href = '/recent?format=csv&' + all + 'dgm=' + pointsList + '&elapsed=' + elapsed;
 	} else if (series.length > 0){
 
-		window.location.href = '/range/csv?' + all + 'dgm=' + pointsList + '&start=' + series[0].data[0].x * 1000 +
+		window.location.href = '/range?format=csv&' + all + 'dgm=' + pointsList + '&start=' + series[0].data[0].x * 1000 +
 		'&end=' + series[0].data[series[0].data.length-1].x * 1000;
 	}
 });

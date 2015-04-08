@@ -324,6 +324,75 @@ var getLatest = function(dgm, callback) {
 	});
 };
 
+var getProjectionAndUnits = function(db, dgm, desired, callback) {
+
+	if (desired == 'all') {
+		// get units
+		db.collection('meta_' + cleanDGM(dgm)).find().toArray(function(err, variables) {
+			if (!err && variables) {
+				var unit = {};
+
+				for (var i in variables) {
+					if (variables[i].name && variables[i].name.indexOf('@') < 0) {
+						unit[variables[i].name] = variables[i].unit;
+					}
+				}
+
+				callback(null, null, unit);
+			} else {
+				console.warn('error getting all fields from ' + dgm);
+				console.warn(err.stack);
+				callback(err);
+			}
+		});
+	} else {
+		// Pick variables to retrieve
+		var projection = buildProjection(desired);
+
+		if (projection) {
+			// get units
+			db.collection('meta_' + cleanDGM(dgm)).find({name: { $in: desired }}, {name: true, unit: true}).toArray(function(err, variables) {
+				if (!err && variables) {
+					var unit = {};
+
+					for (var i in variables) {
+						if (variables[i].name) {
+							unit[variables[i].name] = variables[i].unit;
+						}
+					}
+
+					callback(null, projection, unit);
+				} else {
+					console.warn('error getting units from ' + dgm);
+					console.warn(err.stack);
+					callback(err);
+				}
+			});
+		} else {
+			// get the variables that have kW
+			db.collection('meta_' + cleanDGM(dgm)).find({unit: 'kW'}, {name: true}).toArray(function(err, variables) {
+				if (!err && variables) {
+					var projection = {time: true};
+					var unit = {};
+
+					for (var i in variables) {
+						if (variables[i].name && variables[i].name.indexOf('@') < 0) {
+							projection[variables[i].name] = true;
+							unit[variables[i].name] = 'kW';
+						}
+					}
+
+					callback(null, projection, unit);
+				} else {
+					console.warn('error getting variables from ' + dgm);
+					console.warn(err.stack);
+					callback(err);
+				}
+			});
+		}
+	}
+};
+
 var getRecent = function(dgm, elapsed, desired, processor, cb) {
 	// Gets a recent set of data from the database
 	
@@ -342,71 +411,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 		var collection = db.collection(cleanDGM(dgm));
 
 		async.waterfall([ function(callback) {
-			if (desired == 'all') {
-				// get units
-				db.collection('meta_' + cleanDGM(dgm)).find().toArray(function(err, variables) {
-					if (!err && variables) {
-						var unit = {};
-
-						for (var i in variables) {
-							if (variables[i].name && variables[i].name.indexOf('@') < 0) {
-								unit[variables[i].name] = variables[i].unit;
-							}
-						}
-
-						callback(null, projection, unit);
-					} else {
-						console.warn('error getting all fields from ' + dgm);
-						console.warn(err.stack);
-						callback(err);
-					}
-				});
-			} else {
-				// Pick variables to retrieve
-				var projection = buildProjection(desired);
-
-				if (projection) {
-					// get units
-					db.collection('meta_' + cleanDGM(dgm)).find({name: { $in: desired }}, {name: true, unit: true}).toArray(function(err, variables) {
-						if (!err && variables) {
-							var unit = {};
-
-							for (var i in variables) {
-								if (variables[i].name) {
-									unit[variables[i].name] = variables[i].unit;
-								}
-							}
-
-							callback(null, projection, unit);
-						} else {
-							console.warn('error getting units from ' + dgm);
-							console.warn(err.stack);
-							callback(err);
-						}
-					});
-				} else {
-					// get the variables that have kW
-					db.collection('meta_' + cleanDGM(dgm)).find({unit: 'kW'}, {name: true}).toArray(function(err, variables) {
-						if (!err && variables) {
-							var projection = {time: true};
-							var unit = {};
-
-							for (var i in variables) {
-								if (variables[i].name && variables[i].name.indexOf('@') < 0) {
-									projection[variables[i].name] = true;
-									unit[variables[i].name] = 'kW';
-								}
-							}
-
-							callback(null, projection, unit);
-						} else {
-							console.warn('error getting variables from ' + dgm);
-							console.warn(err.stack);
-							callback(err);
-						}
-					});
-				}
-			}
+			getProjectionAndUnits(db, dgm, desired, callback);
 		}, function(projection, units, callback) {
 			// get the time of the newest datapoint in the database
 			collection.find().sort({time: -1}).limit(1).nextObject(function(err, item) {
@@ -446,13 +451,10 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 });
 };
 
-var getRange = function(dgm, start, end, desired, processor, callback) {
+var getRange = function(dgm, start, end, desired, processor, cb) {
 	// Gets data between two times from the database
 	
 	desired = (desired === undefined) ? [] : desired;
-	
-	// Pick variables to retrieve
-	var projection = buildProjection(desired);
 	
 	/* Connect to the DB and auth */
 	MongoClient.connect(mongourl, function(err, db) {
@@ -462,34 +464,12 @@ var getRange = function(dgm, start, end, desired, processor, callback) {
 
 		async.waterfall([
 			function(callback) {
-				var list;
-
-				if (projection) {
-					list = {name: { $in: desired }};
-				}
-
-				// get units
-				db.collection('meta_' + cleanDGM(dgm)).find(list).toArray(function(err, variables) {
-					var unit = {};
-
-					for (var i in variables) {
-						if (variables[i].name) {
-							unit[variables[i].name] = variables[i].unit;
-						}
-					}
-
-					if (!err && variables) {
-						callback(null, unit);
-					} else {
-						console.warn('error getting units from ' + dgm);
-						console.warn(err.stack);
-						callback(err);
-					}
-				});
+				getProjectionAndUnits(db, dgm, desired, callback);
 			},
-			function(units, callback) {
-				// query for events newer than latest - elapsed
+			function(projection, units, callback) {
+				// query for events between start and end
 				var cursor;
+
 				if (projection)
 					cursor = collection.find({ time: { $lt: end, $gt: start }}, projection);
 				else
@@ -501,7 +481,7 @@ var getRange = function(dgm, start, end, desired, processor, callback) {
 			}, processor
 		],
 		function(err, processed) {
-			callback(processed);
+			cb(processed);
 		});
 	});
 };

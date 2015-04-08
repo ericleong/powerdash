@@ -11,7 +11,7 @@
     "moment": "^2.8.2",
     "moment-timezone": "^0.3.1",
     "mongodb": "^1.4.35",
-    "ntlm-auth": "^0.1.0",
+    "ntlm-auth": "^0.1.1",
     "put": "0.0.6",
     "socket.io": "^0.9.17",
     "stream-stack": "~1.1.4",

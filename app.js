@@ -323,46 +323,29 @@ app.get('/recent', function(req, res) {
 		}
 	}
 
-	var dgm = req.query['dgm'] ? req.query['dgm'] : 'x-pml:/diagrams/ud/41cooper.dgm'; 
-	
-	api.getRecent(dgm, elapsed,
-		variables, api.toRickshaw, function(list) {
+	var dgm = req.query['dgm'] ? req.query['dgm'] : 'x-pml:/diagrams/ud/41cooper.dgm';
+
+	if (req.query['format'] == 'csv') {
+		api.generateCSV(dgm.split(','), variables, 
+			function(dgm, variables, method, callback) {
+				api.getRecent(dgm, elapsed, variables, method, function(data) {
+					callback(null, data);
+				});
+			}, 
+			function(err, data) {
+				if (err) {
+					res.send(500, err);
+				} else {
+					res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
+					res.send(data);
+				}
+			}
+		);
+	} else {
+		api.getRecent(dgm, elapsed, variables, api.toRickshaw, function(list) {
 			res.json(list);
 		});
-});
-
-function dgmToFileName(dgm) {
-	return dgm.substring(dgm.indexOf('41cooper')).replace(/\//gi, '-');
-}
-
-app.get('/recent/csv', function(req, res) {
-	var elapsed = req.query['elapsed'] ? req.query['elapsed'] : 60*60*1000;
-
-	var variables = undefined;
-	if (req.query['variables']) {
-		if (req.query['variables'] == 'all') {
-			variables = 'all';
-		} else {
-			variables = req.query['variables'].split(',');
-		}
 	}
-
-	var dgm = req.query['dgm'] ? req.query['dgm'] : 'x-pml:/diagrams/ud/41cooper.dgm';
-	
-	var recentCSV = function(dgm, variables, method, callback) {
-		api.getRecent(dgm, elapsed, variables, method, function(data) {
-			callback(null, data);
-		});
-	};
-
-	api.generateCSV(dgm.split(','), variables, recentCSV, function(err, data) {
-		if (err) {
-			res.send(500, err);
-		} else {
-			res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
-			res.send(data);
-		}
-	});
 });
 
 var getDateRange = function(req) {
@@ -387,7 +370,7 @@ var getDateRange = function(req) {
 	return {start: start, end: end};
 };
 
-app.get('/range/csv', function(req, res) {
+app.get('/range', function(req, res) {
 	if (!req.query['start']) {
 		res.send(400, 'Need start time!');
 		return;
@@ -411,22 +394,28 @@ app.get('/range/csv', function(req, res) {
 		return;
 	}
 
-	var rangeCSV = function(dgm, variables, method, callback) {
-		api.getRange(dgm, range.start, range.end, variables, method, function(data) {
-			callback(null, data);
+	if (req.query['format'] == 'csv') {
+		var formatString = 'YYYY-MM-DD-HH-mm-ss';
+
+		api.generateCSV(dgm.split(','), variables, 
+			function(dgm, variables, method, callback) {
+				api.getRange(dgm, range.start, range.end, variables, method, function(data) {
+					callback(null, data);
+				});
+			}, function(err, data) {
+				if (err) {
+					res.send(500, err);
+				} else {
+					res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
+					res.send(data);
+				}
+			}
+		);
+	} else {
+		api.getRange(dgm, range.start, range.end, variables, api.toRickshaw, function(list) {
+			res.json(list);
 		});
-	};
-
-	var formatString = 'YYYY-MM-DD-HH-mm-ss';
-
-	api.generateCSV(dgm.split(','), variables, rangeCSV, function(err, data) {
-		if (err) {
-			res.send(500, err);
-		} else {
-			res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
-			res.send(data);
-		}
-	});
+	}
 });
 
 app.get('/recent/diff', function(req, res) {
