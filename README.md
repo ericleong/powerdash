@@ -87,6 +87,58 @@ $ node ./app.js
 ```
 then visit `localhost:8080` (or the domain you set) in your browser.
 
+API
+---
+
+The application program interface (API) is how external software can communicate with this program. The frontend code running inside the brower also uses this interface to query for data.
+
+## `/recent` - query for recent datapoints
+
+This method returns a set of recent datapoints. For example, it can be used to query for data recorded during the previous hour.
+
+### Method
+
+| URI       | HTTP Method |
+| --------- | ----------- |
+| `/recent` | `GET`       |
+
+### Request Parameters
+
+| Parameter     | Type   | Description                                   | Default                           | Required |
+| ------------- | ------ | --------------------------------------------- | --------------------------------- | -------- |
+| **elapsed**   | Number | Number of millseconds before the latest entry | `60 * 60 * 1000` (one hour)       | No       |
+| **dgm**       | String | Collection to query                           | `x-pml:/diagrams/ud/41cooper.dgm` | No       |
+| **variables** | String | Comma-separated list of fields, or `all`      | `kW`-only fields                  | No       |
+| **format**    | String | Response format, either `csv` or `rickshaw`   | `rickshaw`                        | No       |
+
+### Notes
+
+`rickshaw` is intended to be used by the Rickshaw charting library. The `csv` format also supports a comma-separated list of collections.
+
+## `/range` - query for a range of datapoints
+
+This method returns datapoints recorded during a time interval. For example, it can be used to query for data recorded on a certain date.
+
+### Method
+
+| URI       | HTTP Method |
+| --------- | ----------- |
+| `/range`  | `GET`       |
+
+### Request Parameters
+
+| Parameter     | Type   | Description                                 | Default                           | Required |
+| ------------- | ------ | ------------------------------------------- | --------------------------------- | -------- |
+| **start**     | Number | Start of desired range as a unix timestamp  | None                              | _Yes_    |
+| **end**       | Number | End of desired range as a unix timestamp    | the current time                  | No       |
+| **dgm**       | String | Collection to query                         | `x-pml:/diagrams/ud/41cooper.dgm` | No       |
+| **variables** | String | Comma-separated list of fields, or `all`    | `kW`-only fields                  | No       |
+| **format**    | String | Response format, either `csv` or `rickshaw` | `rickshaw`                        | No       |
+
+### Notes
+
+**start** must be earlier than **end**. `rickshaw` is intended to be used by the Rickshaw charting library. The `csv` format also supports a comma-separated list of collections.
+
 How it Works
 ------------
 
