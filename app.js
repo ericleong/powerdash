@@ -50,11 +50,7 @@ io.configure('production', function() {
 	io.enable('browser client gzip');          // gzip the file
 	io.set('log level', 1);                    // reduce logging
 	
-	if (process.env.SUBDOMAIN) { // nodejitsu
-		io.set('transports', ['websocket', 'xhr-polling']);
-	} else {
-		io.set('transports', ['xhr-polling']);
-	}
+	io.set('transports', ['websocket', 'xhr-polling']);
 });
 
 io.configure('development', function() {
