@@ -34,10 +34,6 @@ app.set('view engine', 'jade');
 app.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + '/history' }));
 
 /* SERVER */
-process.on('uncaughtException', function (err) {
-	console.error('Uncaught exception: ' + err.message);
-	console.error(err.stack);
-});
 
 server.listen(process.env.PORT || 8080);
 var io = sio.listen(server);
