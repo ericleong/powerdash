@@ -2,11 +2,11 @@
 
 var express = require('express'),
 	http = require('http'),
-	sio = require('socket.io'),
 	fs = require('fs'),
 	moment = require('moment-timezone'),
 	async = require('async'),
 	readline = require('readline'),
+	multipart = require('connect-multiparty'),
 	MongoClient = require('mongodb').MongoClient,
 	scrape = require('./scrape.js'),
 	mongo = require('./mongo.js'),
@@ -15,6 +15,7 @@ var express = require('express'),
 
 var app = express();
 var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 /* APP */
 var host = 'localhost:8080';
@@ -30,28 +31,9 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'jade');
 
-// history uploading
-app.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + '/history' }));
-
 /* SERVER */
 
 server.listen(process.env.PORT || 8080);
-var io = sio.listen(server);
-
-/* SOCKET IO */
-
-io.configure('production', function() {
-	io.enable('browser client minification');  // send minified client
-	io.enable('browser client etag');          // apply etag caching logic based on version number
-	io.enable('browser client gzip');          // gzip the file
-	io.set('log level', 1);                    // reduce logging
-	
-	io.set('transports', ['websocket', 'xhr-polling']);
-});
-
-io.configure('development', function() {
-	io.set('transports', ['websocket']);
-});
 
 app.get('/', function(req, res) {
 	res.render('index', {
@@ -78,7 +60,9 @@ app.get('/upload', function(req, res) {
 	res.render('upload');
 });
 
-app.post('/upload', function(req, res) {
+var multipartMiddleware = multipart({uploadDir: __dirname + '/history' });
+
+app.post('/upload', multipartMiddleware, function(req, res) {
 	var dgm = req.body.collection;
 
 	if (dgm === undefined || dgm.length <= 0) {
