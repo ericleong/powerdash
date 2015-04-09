@@ -139,6 +139,52 @@ This method returns datapoints recorded during a time interval. For example, it 
 
 **start** must be earlier than **end**. `rickshaw` is intended to be used by the Rickshaw charting library. The `csv` format also supports a comma-separated list of collections.
 
+Realtime Updates
+----------------
+
+Clients can receive realtime updates using **socket.io**, a library for real-time communication. Upon the first connection, clients should emit `load` with an object that contains `dgm`, `variables`, and `elapsed` (the same parameters as the `/recent` api). The server will then emit a `dataset` event with the corresponding recent data. This is similar to directly calling the `/recent` route, but perhaps works better with a realtime workflow. Here is an example object:
+
+```JSON
+{
+  "dgm": "x-pml:/diagrams/ud/41cooper.dgm",
+  "variables": "all",
+  "elapsed": 3600000
+}
+```
+
+Note that `variables` should be an array instead of a comma-separated string of desired fields. The output is in `rickshaw` format.
+
+To subscribe to realtime updates, emit `update` with the desired `dgm`. If no `dgm` is specified, `x-pml:/diagrams/ud/41cooper.dgm` is the default.
+
+To unsubscribe from realtime updates, emit `pause` with the desired `dgm` to unsubscribe from. If no `dgm` is specified, `x-pml:/diagrams/ud/41cooper.dgm` is the default.
+
+Data is emitted via the `update` event. Here is an example update:
+
+```JSON
+[
+  {
+    "name": "SRV1KW",
+    "data": [
+      {
+        "x": 1427942712,
+        "y": 252
+      }
+    ]
+  },
+  {
+    "name": "SV2KW",
+    "data": [
+      {
+        "x": 1427942712,
+        "y": 62
+      }
+    ]
+  }
+]
+```
+
+Note that `name` corresponds to the `raw` field in the `rickshaw` response.
+
 How it Works
 ------------
 
