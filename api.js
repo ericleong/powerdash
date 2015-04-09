@@ -1,8 +1,10 @@
+'use strict';
+
 var async = require('async'),
-mongo = require('./mongo.js'),
-cleanDGM = require('./utils.js').cleanDGM,
-moment = require('moment-timezone'),
-MongoClient = require('mongodb').MongoClient;
+	moment = require('moment-timezone'),
+	MongoClient = require('mongodb').MongoClient,
+	mongo = require('./mongo.js'),
+	cleanDGM = require('./utils.js').cleanDGM;
 
 var mongourl = mongo.getMongoUrl();
 

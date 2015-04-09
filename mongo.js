@@ -1,3 +1,5 @@
+'use strict';
+
 var getMongoUrl = function() {
 	var mongourl;
 

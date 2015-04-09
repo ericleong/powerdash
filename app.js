@@ -1,20 +1,20 @@
-var express = require('express');
+'use strict';
 
-var sys = require('sys'),
-app = express(),
-http = require('http'),
-server = http.createServer(app),
-sio = require('socket.io'),
-fs = require('fs'),
-moment = require('moment-timezone'),
-async = require('async'),
-MongoClient = require('mongodb').MongoClient,
-scrape = require('./scrape.js'),
-mongo = require('./mongo.js'),
-api = require('./api.js'),
-cleanDGM = require('./utils.js').cleanDGM,
-readline = require('readline')
-;
+var express = require('express'),
+	http = require('http'),
+	sio = require('socket.io'),
+	fs = require('fs'),
+	moment = require('moment-timezone'),
+	async = require('async'),
+	readline = require('readline'),
+	MongoClient = require('mongodb').MongoClient,
+	scrape = require('./scrape.js'),
+	mongo = require('./mongo.js'),
+	api = require('./api.js'),
+	cleanDGM = require('./utils.js').cleanDGM;
+
+var app = express();
+var server = http.createServer(app);
 
 /* APP */
 var host = 'localhost:8080';

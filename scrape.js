@@ -1,12 +1,15 @@
-var ntlmRequest = require('ntlm-auth').ntlmRequest,
-	mongo = require('./mongo.js'),
-	MongoClient = require('mongodb').MongoClient,
+'use strict';
+
+
+var async = require('async'),
+	util = require('util'),
 	moment = require('moment-timezone'),
+	MongoClient = require('mongodb').MongoClient,
+	mongo = require('./mongo.js'),
+	ntlmRequest = require('ntlm-auth').ntlmRequest,
 	parseString = require('xml2js').parseString,
 	getLatest = require('./api.js').getLatest,
-	cleanDGM = require('./utils.js').cleanDGM,
-	async = require('async'),
-	util = require('util');
+	cleanDGM = require('./utils.js').cleanDGM;
 
 var mongourl = mongo.getMongoUrl();
 
