@@ -1,5 +1,5 @@
-energydash
-==========
+powerdash
+=========
 
 Tracks energy usage at [41 Cooper Square](https://www.cooper.edu/about/history/41-cooper-square), the engineering building of [The Cooper Union](https://www.cooper.edu/).
 

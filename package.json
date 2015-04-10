@@ -1,6 +1,6 @@
 {
-  "name": "energydash",
-  "version": "0.0.0-24",
+  "name": "powerdash",
+  "version": "0.1.0",
   "description": "a real time energy dashboard",
   "main": "app.js",
   "dependencies": {
@@ -29,8 +29,12 @@
   ],
   "author": "leong@cooper.edu",
   "license": "MIT",
-  "subdomain": "energydash",
+  "subdomain": "powerdash",
   "engines": {
     "node": "0.12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ericleong/powerdash"
   }
 }
