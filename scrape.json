@@ -10,6 +10,13 @@
     ]
   },
   {
+    "name": "rain water harvesting",
+    "type": "ntlm",
+    "delay": 15,
+    "dgm": "x-pml:/diagrams/ud/41cooper/greywater.dgm",
+    "node": "COOPER.41COOPERSQ"
+  },
+  {
     "name": "elevator",
     "type": "ntlm",
     "delay": 30,
@@ -84,13 +91,6 @@
     "type": "ntlm",
     "delay": 30,
     "dgm": "x-pml:/diagrams/ud/41cooper/41 7-dh.dgm",
-    "node": "COOPER.41COOPERSQ"
-  },
-  {
-    "name": "rain water harvesting",
-    "type": "ntlm",
-    "delay": 15,
-    "dgm": "x-pml:/diagrams/ud/41cooper/greywater.dgm",
     "node": "COOPER.41COOPERSQ"
   }
 ]
