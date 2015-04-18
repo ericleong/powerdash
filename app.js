@@ -5,9 +5,7 @@ var express = require('express'),
 	fs = require('fs'),
 	moment = require('moment-timezone'),
 	async = require('async'),
-	readline = require('readline'),
 	multipart = require('connect-multiparty'),
-	MongoClient = require('mongodb').MongoClient,
 	scrape = require('./scrape.js'),
 	mongo = require('./mongo.js'),
 	api = require('./api.js'),
@@ -92,117 +90,27 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 		return;
 	}
 
-	/* Connect to the DB and auth */
-	MongoClient.connect(mongo.getMongoUrl(), function(err, db) {
+	api.upload(dgm, req.files.csv.path, function(err, errors) {
 
 		if (err) {
 			res.render('upload', {
 				setname: 'upload',
 				error: err
 			});
-			console.error(err);
-			return;
+		} else if (errors) {
+			res.render('upload', {
+				setname: 'upload',
+				error: errors.join('\n'),
+				file: req.files.csv.name,
+				dgm: dgm
+			});
+		} else {
+			res.render('upload', {
+				setname: 'upload',
+				file: req.files.csv.name,
+				dgm: dgm
+			});
 		}
-
-		db.collection(cleanDGM(dgm), function(err, collection) {
-
-			if (err) {
-				if (err.message) {
-					console.log(err.message);
-				} else {
-					console.log('error getting collection ' + dgm);
-				}
-				return;
-			}
-
-			var close = false;
-			var count = 0;
-
-			var rd = readline.createInterface({
-				input: fs.createReadStream(req.files.csv.path, {
-					encoding: 'ascii'
-				}),
-				output: process.stdout,
-				terminal: false
-			});
-
-			var header = [];
-
-			rd.on('close', function() {
-				close = true;
-
-				fs.unlink(req.files.csv.path);
-
-				res.render('upload', {
-					setname: 'upload',
-					file: req.files.csv.name,
-					dgm: dgm
-				});
-			});
-
-			rd.on('line', function(line) {
-				if (header.length == 0) {
-					// assume first row is header
-					header = line.split(',');
-				} else {
-					var row = line.split(',');
-
-					if (row === undefined || row.length <= 0) {
-						console.log('No data on this line!');
-						return;
-					}
-
-					// assume first column is time
-					var time = moment.tz(row[0], 'DD-MMM-YY HH:mm:ss', 'America/New_York').toDate();
-
-					var data = {};
-
-					for (var i in header) {
-						if (i > 0) {
-							var val = parseInt(row[i], 10);
-
-							if (!isNaN(val)) {
-								data[header[i]] = val;
-							} else {
-								data[header[i]] = row[i];
-							}
-						}
-					}
-
-					if (Object.keys(data).length == 0) {
-						console.log('No data found in: ' + line);
-					}
-
-					// keep track of how many lines we've gone through
-					count++;
-
-					collection.update({time: time}, 
-						{
-							$set: data
-						},
-						{
-							safe: true,
-							upsert: true
-						},
-						function(err, result) {
-							count--;
-
-							if (err) {
-								if (err.message) {
-									console.log(err.message);
-								} else {
-									console.log('error saving data @ ' + row[0]);
-								}
-							}
-
-							if (close && count == 0) {
-								db.close();
-							}
-						}
-					);
-				}
-			});
-		});
 	});
 });
 

@@ -2,6 +2,8 @@
 
 var async = require('async'),
 	moment = require('moment-timezone'),
+	fs = require('fs'),
+	readline = require('readline'),
 	MongoClient = require('mongodb').MongoClient,
 	mongo = require('./mongo.js'),
 	cleanDGM = require('./utils.js').cleanDGM;
@@ -607,6 +609,132 @@ var generateCSV = function(dgms, variables, method, cb) {
 	}
 };
 
+var upload = function(dgm, file, callback) {
+	/* Connect to the DB and auth */
+	MongoClient.connect(mongourl, function(err, db) {
+
+		if (err) {
+			callback(err);
+			return;
+		}
+
+		db.collection(cleanDGM(dgm), function(err, collection) {
+
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			var close = false;
+			var count = 0;
+			var lineCount = 0;
+
+			// list of parse errors
+			var parseErrors = [];
+
+			var rd = readline.createInterface({
+				input: fs.createReadStream(file, {
+					encoding: 'ascii'
+				}),
+				output: process.stdout,
+				terminal: false
+			});
+
+			var header = [];
+
+			rd.on('close', function() {
+				close = true;
+
+				fs.unlink(file);
+
+				if (parseErrors.length > 0) {
+					callback(null, parseErrors);
+				} else {
+					callback(null);
+				}
+			});
+
+			rd.on('line', function(line) {
+
+				lineCount++;
+
+				if (header.length == 0) {
+					// assume first row is header
+					header = line.split(',');
+				} else {
+					var row = line.split(',');
+
+					if (row === undefined || row.length <= 0) {
+						parseErrors.push('line ' + lineCount + ': No data on this line.');
+						return;
+					}
+
+					if (row.length != header.length) {
+						parseErrors.push('line ' + lineCount + ': Number of columns does not match number of columns in header.');
+					}
+
+					// assume first column is time
+					var parsedMoment = moment.tz(row[0], 'DD-MMM-YY HH:mm:ss', 'America/New_York');
+
+					if (!parsedMoment.isValid()) {
+						parseErrors.push('line ' + lineCount + ': No time found on this line.');
+						return;
+					}
+
+					var time = parsedMoment.toDate();
+
+					var data = {};
+
+					for (var i in header) {
+						if (i > 0) {
+							var val = parseInt(row[i], 10);
+
+							if (!isNaN(val)) {
+								data[header[i]] = val;
+							} else {
+								data[header[i]] = row[i];
+							}
+						}
+					}
+
+					if (Object.keys(data).length == 0) {
+						parseErrors.push('line ' + lineCount + ': No data found for this line.');
+						return;
+					}
+
+					// keep track of how many lines we've gone through
+					count++;
+
+					collection.update({time: time}, 
+						{
+							$set: data
+						},
+						{
+							safe: true,
+							upsert: true
+						},
+						function(err, result) {
+							count--;
+
+							if (err) {
+								if (err.message) {
+									console.log(err.message);
+								} else {
+									console.log('error saving data @ ' + row[0]);
+								}
+							}
+
+							if (close && count == 0) {
+								db.close();
+							}
+						}
+					);
+				}
+			});
+		});
+	});
+}
+
 module.exports.getRange = getRange;
 module.exports.getLatest = getLatest;
 module.exports.getRecent = getRecent;
@@ -615,3 +743,4 @@ module.exports.toCSV = toCSV;
 module.exports.toArray = toArray;
 module.exports.diff = diff;
 module.exports.generateCSV = generateCSV;
+module.exports.upload = upload;
