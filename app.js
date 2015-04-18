@@ -57,8 +57,18 @@ app.get('/', function(req, res) {
 });
 
 app.get('/upload', function(req, res) {
-	res.render('upload');
+	res.render('upload', {
+		setname: 'upload'
+	});
 });
+
+try {
+	fs.mkdirSync(__dirname + '/history');
+} catch (err) {
+	if (err && err.code != 'EEXIST') {
+		console.error(err); // error creating directory
+	}
+}
 
 var multipartMiddleware = multipart({uploadDir: __dirname + '/history' });
 
@@ -66,18 +76,32 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 	var dgm = req.body.collection;
 
 	if (dgm === undefined || dgm.length <= 0) {
-		res.render('upload', {error: 'No collection provided.'});
+		res.render('upload', {
+			setname: 'upload',
+			error: 'No collection provided.'
+		});
 		return;
 	}
 
-	console.log('Reading data into ' + dgm);
+	if (!req.files || !req.files.csv || !req.files.csv.path || req.files.csv.path.length == 0) {
+		res.render('upload', {
+			setname: 'upload',
+			error: 'No file provided.'
+		});
+
+		return;
+	}
 
 	/* Connect to the DB and auth */
 	MongoClient.connect(mongo.getMongoUrl(), function(err, db) {
 
 		if (err) {
-			res.render('upload', {error: err});
-			return console.dir(err);
+			res.render('upload', {
+				setname: 'upload',
+				error: err
+			});
+			console.error(err);
+			return;
 		}
 
 		db.collection(cleanDGM(dgm), function(err, collection) {
@@ -107,7 +131,10 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 			rd.on('close', function() {
 				close = true;
 
+				fs.unlink(req.files.csv.path);
+
 				res.render('upload', {
+					setname: 'upload',
 					file: req.files.csv.name,
 					dgm: dgm
 				});
@@ -126,7 +153,7 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 					}
 
 					// assume first column is time
-					var time = moment.tz(row[0], 'America/New_York').toDate();
+					var time = moment.tz(row[0], 'DD-MMM-YY HH:mm:ss', 'America/New_York').toDate();
 
 					var data = {};
 
