@@ -115,6 +115,37 @@ This method returns a set of recent datapoints. For example, it can be used to q
 
 `rickshaw` is intended to be used by the Rickshaw charting library. The `csv` format also supports a comma-separated list of collections.
 
+## `/recent/diff` - change in value
+
+This method returns the difference between the current and a past set of datapoints. For example, it can be used to query for the amount of water collected over the previous day.
+
+### Method
+
+| URI            | HTTP Method |
+| -------------- | ----------- |
+| `/recent/diff` | `GET`       |
+
+### Request Parameters
+
+| Parameter     | Type   | Description                                   | Default                                     | Required |
+| ------------- | ------ | --------------------------------------------- | ------------------------------------------- | -------- |
+| **elapsed**   | Number | Number of millseconds before the latest entry | `24 * 60 * 60 * 1000` (one day)             | No           |
+| **dgm**       | String | Collection to query                           | `x-pml:/diagrams/ud/41cooper/greywater.dgm` | No           |
+| **variables** | String | Comma-separated list of fields, or `all`      | `all`                                       | No           |
+
+### Example Output
+
+```JSON
+{
+  "time": 86400000,
+  "ART9 Result 1": 280,
+  "ART8 Result 1": 0,
+  "ART8 Result 2": 280
+}
+```
+
+Note that the time is not the current time, but the time elapsed between the data points used for the calculation (in case the time difference is not exactly 24 hours).
+
 ## `/range` - query for a range of datapoints
 
 This method returns datapoints recorded during a time interval. For example, it can be used to query for data recorded on a certain date.
@@ -138,6 +169,31 @@ This method returns datapoints recorded during a time interval. For example, it 
 ### Notes
 
 **start** must be earlier than **end**. `rickshaw` is intended to be used by the Rickshaw charting library. The `csv` format also supports a comma-separated list of collections.
+
+## `/upload` - upload new datapoints from a file
+
+This method allows new datapoints to be uploaded to the server. 
+
+### Method
+
+| URI       | HTTP Method |
+| --------- | ----------- |
+| `/upload` | `POST`      |
+
+### Request Parameters
+
+| Parameter      | Type   | Description                                                                | Default | Required |
+| -------------- | ------ | -------------------------------------------------------------------------- | ------- | -------- |
+| **collection** | String | Name of the collection the data belongs to                                 | None    | _Yes_    |
+| **data**       | Binary | [CSV](//en.wikipedia.org/wiki/Comma-separated_values) file with header row | None    | _Yes_    |
+
+### Response
+
+A webpage with the upload form, number of lines correctly parsed, and any parsing errors.
+
+### Notes
+
+This cannot be used to update the `meta` collections because it is assumed that the first column represents `time`. Time should follow the CSV format created by this application. This route is intended to be used by the form obtained by doing a `GET` request on `/upload`.
 
 Realtime Updates
 ----------------
