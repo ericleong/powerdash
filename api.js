@@ -625,9 +625,11 @@ var upload = function(dgm, file, callback) {
 				return;
 			}
 
-			var close = false;
-			var count = 0;
+			var validLineCount = 0;
 			var lineCount = 0;
+
+			// bulk operation
+			var batch = collection.initializeUnorderedBulkOp();
 
 			// list of parse errors
 			var parseErrors = [];
@@ -643,15 +645,32 @@ var upload = function(dgm, file, callback) {
 			var header = [];
 
 			rd.on('close', function() {
-				close = true;
 
 				fs.unlink(file);
 
 				if (parseErrors.length > 0) {
-					callback(null, parseErrors);
+					callback(null, {
+						lines: validLineCount,
+						errors: parseErrors
+					});
 				} else {
-					callback(null);
+					callback(null, {
+						lines: validLineCount
+					});
 				}
+
+				batch.execute(function(err, result) {
+
+					if (err) {
+						if (err.message) {
+							console.log(err.message);
+						} else {
+							console.log('error saving data @ ' + row[0]);
+						}
+					}
+
+					db.close();
+				});
 			});
 
 			rd.on('line', function(line) {
@@ -674,7 +693,15 @@ var upload = function(dgm, file, callback) {
 					}
 
 					// assume first column is time
-					var parsedMoment = moment.tz(row[0], 'DD-MMM-YY HH:mm:ss', 'America/New_York');
+					var parsedMoment;
+
+					if (row[0].indexOf('-') >= 0) {
+						parsedMoment = moment.tz(row[0], 'DD-MMM-YY HH:mm:ss', 'America/New_York');
+					} else {
+						// try another format
+						parsedMoment = moment.tz(row[0], 'MM/DD/YYYY HH:mm:ss', 'America/New_York');
+					}
+
 
 					if (!parsedMoment.isValid()) {
 						parseErrors.push('line ' + lineCount + ': No time found on this line.');
@@ -703,32 +730,13 @@ var upload = function(dgm, file, callback) {
 					}
 
 					// keep track of how many lines we've gone through
-					count++;
+					validLineCount++;
 
-					collection.update({time: time}, 
-						{
-							$set: data
-						},
-						{
-							safe: true,
-							upsert: true
-						},
-						function(err, result) {
-							count--;
+					data['time'] = time;
 
-							if (err) {
-								if (err.message) {
-									console.log(err.message);
-								} else {
-									console.log('error saving data @ ' + row[0]);
-								}
-							}
-
-							if (close && count == 0) {
-								db.close();
-							}
-						}
-					);
+					batch.find({time: time}).upsert().updateOne({
+						$set: data
+					});
 				}
 			});
 		});

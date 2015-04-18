@@ -90,25 +90,26 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 		return;
 	}
 
-	api.upload(dgm, req.files.csv.path, function(err, errors) {
+	api.upload(dgm, req.files.csv.path, function(err, results) {
 
 		if (err) {
 			res.render('upload', {
 				setname: 'upload',
 				error: err
 			});
-		} else if (errors) {
+		} else if (results && results.errors) {
 			res.render('upload', {
 				setname: 'upload',
-				error: errors.join('\n'),
+				error: errors.join('<br>'),
 				file: req.files.csv.name,
 				dgm: dgm
 			});
-		} else {
+		} else if (results && results.lines) {
 			res.render('upload', {
 				setname: 'upload',
 				file: req.files.csv.name,
-				dgm: dgm
+				dgm: dgm,
+				lines: results.lines
 			});
 		}
 	});

@@ -9,7 +9,10 @@ html
 			input(type='file', name='csv')
 			input(type='submit')
 
-		if file && dgm
+		if lines && file && dgm
+			p uploaded #{lines} lines from #{file} into #{dgm}
+
+		else if file && dgm
 			p uploaded #{file} into #{dgm}
 
 		if error
