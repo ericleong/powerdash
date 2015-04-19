@@ -222,6 +222,9 @@ a.title:hover {
 	float: left;
 	width: 60px;
 }
+#y-axis > svg {
+	overflow: visible;
+}
 
 .rickshaw_graph .detail .x_label { 
 	display: none;
@@ -233,5 +236,22 @@ a.title:hover {
 	}
 	#controls {
 		display: none;
+	}
+}
+
+@media screen and (max-width: 800px) {
+	#logo {
+		font-size: 24pt;
+	}
+	#side {
+		display: block;
+		margin-left: 15px;
+		margin-top: 2em;
+	}
+	h1 {
+		font-size: 16pt;
+	}
+	#nav, .chart-title, .description {
+		margin-left: 16pt;
 	}
 }

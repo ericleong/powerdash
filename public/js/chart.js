@@ -1,3 +1,5 @@
+'use strict';
+
 var socket = io.connect(host);
 
 var graph;
