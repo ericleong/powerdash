@@ -17,6 +17,10 @@
     "node": "COOPER.41COOPERSQ"
   },
   {
+    "type": "modbus",
+    "delay": 60
+  },
+  {
     "name": "elevator",
     "type": "ntlm",
     "delay": 30,

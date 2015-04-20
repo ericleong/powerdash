@@ -70,7 +70,7 @@ function storeNtlmMeta(dgm, items) {
 					{
 						upsert: true
 					}, function(err, result) {
-						if (err){
+						if (err) {
 							console.warn(err.message);  // returns error if no matching object found
 						}
 
@@ -261,11 +261,10 @@ function storeModbusData(dgm, items, timestamp) {
 					safe : true
 				}, function(err, result) {
 					if (err) {
-						console.warn('error storing metadata: ' + err.message);
+						console.warn('error storing modbus data: ' + err.message);
 					}
+					db.close();
 				});
-				
-				db.close();
 			});
 		});
 	});
@@ -281,30 +280,30 @@ function storeModbusMeta(dgm, items) {
 		db.collection('meta_' + cleanDGM(dgm), function(err, collection) {
 			
 			collection.ensureIndex({h: 1, name: 1}, function() {
+
+				var batch = collection.initializeUnorderedBulkOp();
 				
 				for (var i in items) {
 					/* Note the _id has been created */
-					collection.findAndModify({
+
+					batch.find({
 						h: i,
-					}, [],
-					{
+					}).upsert().updateOne({
 						$set: {
+							h: i,
 							name: modbus_interpret.name[i],
 							unit: modbus_interpret.unit[i],
 						}
-					},
-					{
-						upsert: true
-					}, function(err, result) {
-						if (err) {
-							console.warn('error storing metadata: ' + err.message);  // returns error if no matching object found
-						} else {
-							console.dir(object);
-						}
 					});
 				}
-				
-				db.close();
+
+				batch.execute(function(err, result) {
+					if (err) {
+						console.warn('error storing modbus metadata: ' + err.message);  // returns error if no matching object found
+					}
+
+					db.close();
+				});
 			});
 		});
 	});
