@@ -27,6 +27,10 @@ $('#offset-form input[type=radio]').change(function() {
 		elapsed = 2*4*7*24*60*60*1000; // 2x28 days
 		setPaused(true);
 		$('#pause').attr('disabled', true);
+	} else if ($(this).val() == 'one-year') {
+		elapsed = 365*24*60*60*1000; // 365 days
+		setPaused(true);
+		$('#pause').attr('disabled', true);
 	}
 	setElapsed();
 	loadPoints();

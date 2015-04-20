@@ -67,9 +67,13 @@ html(lang='en')
 							input(type='radio', name='elapsed', value='two-months')
 							label(for='two-months') two months
 							br
+							input(type='radio', name='elapsed', value='one-year')
+							label(for='one-year') one year
+							br
 						section.form-section
 							input#download(type='button', value='download')
 				if message
 					p.message #{message}
+		footer Created by #[a(href='//ericleong.me') Eric Leong] with partial support from the National Science Foundation under #[a(href='//www.nsf.gov/awardsearch/showAward?AWD_ID=1044830') grant no. DUE 104483]
 		script(src='/js/settings.js')
 		script(src='/js/chart.js')

@@ -30,7 +30,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 		var num = 0;
 
 		var offset = new Date().getTimezoneOffset() * 60 * 1000;
-		
+
 		cursor.each(function(err, doc) {
 			if (err) {
 				console.error('error converting to rickshaw');
@@ -59,7 +59,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 				return;
 			}
 			
-			if (count <= 60*24) { // less than one day at 1 sample/min
+			if (count <= 60*24*2) {
 				for (var col in doc) {
 					if (col == 'time' || col == '_id')
 						continue;
@@ -76,7 +76,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 						} ];
 					}
 				}
-			} else if (count <= 60*24*7) {
+			} else if (count <= 60*24*4) {
 				// minute by minute intervals
 				
 				if (lastTime) {
@@ -134,7 +134,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 						row[col] = doc[col];
 					}
 				}
-			} else {
+			} else if (count <= 60*24*7) {
 				// hour-by-hour intervals
 
 				if (lastTime) {
@@ -182,6 +182,68 @@ var toRickshaw = function(db, cursor, units, cb) {
 					}
 				} else {
 					lastTime = doc.time;
+					lastTime.setMinutes(0);
+					lastTime.setSeconds(0);
+					lastTime.setMilliseconds(0);
+					num = 1;
+					
+					for (var col in doc) {
+						if (col == 'time' || col == '_id')
+							continue;
+						
+						row[col] = doc[col];
+					}
+				}
+			} else {
+				// day-by-day intervals
+
+				if (lastTime) {
+					// new day
+					if (doc.time.getDay() != lastTime.getDay()) {
+						lastTime.setHours(0);
+						lastTime.setMinutes(0);
+						lastTime.setSeconds(0);
+						lastTime.setMilliseconds(0);
+						
+						// save previous day
+						for (var col in row) {
+							if (map[col]) {
+								if (row[col] && num) {
+									map[col].push({
+										x: parseInt(moment(lastTime).format('X'), 10),
+										y: row[col] / num
+									});
+								} else {
+									console.warn(lastTime + ': ' + row[col] + ' ' + num);
+								}
+							} else {
+								map[col] = [ {
+									x: parseInt(moment(lastTime).format('X'), 10),
+									y: row[col] / num
+								} ];
+							}
+						}
+						
+						for (var col in row) {
+							row[col] = doc[col];
+						}
+						
+						// switch to new day
+						lastTime = doc.time;
+						num = 1;
+					} else { // same day
+						for (var col in row) {
+							if (typeof doc[col] == 'number') {
+								row[col] += doc[col];
+							} else {
+								console.warn(doc.time + ': ' + col + ' == ' + doc[col]);
+							}
+						}
+						num++;
+					}
+				} else {
+					lastTime = doc.time;
+					lastTime.setHours(0);
 					lastTime.setMinutes(0);
 					lastTime.setSeconds(0);
 					lastTime.setMilliseconds(0);
