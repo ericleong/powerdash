@@ -197,20 +197,21 @@ var toRickshaw = function(db, cursor, units, cb) {
 			} else {
 				// day-by-day intervals
 
+				var time = moment.tz(doc.time, 'America/New_York');
+				time.hours(0);
+				time.minutes(0);
+				time.seconds(0);
+				time.milliseconds(0);
+
 				if (lastTime) {
 					// new day
-					if (doc.time.getDay() != lastTime.getDay()) {
-						lastTime.setHours(0);
-						lastTime.setMinutes(0);
-						lastTime.setSeconds(0);
-						lastTime.setMilliseconds(0);
-						
+					if (!time.isSame(lastTime)) {
 						// save previous day
 						for (var col in row) {
 							if (map[col]) {
 								if (row[col] && num) {
 									map[col].push({
-										x: parseInt(moment.tz(lastTime, 'America/New_York').format('X'), 10),
+										x: parseInt(lastTime.format('X'), 10),
 										y: row[col] / num
 									});
 								} else {
@@ -218,7 +219,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 								}
 							} else {
 								map[col] = [ {
-									x: parseInt(moment.tz(lastTime, 'America/New_York').format('X'), 10),
+									x: parseInt(lastTime.format('X'), 10),
 									y: row[col] / num
 								} ];
 							}
@@ -229,24 +230,20 @@ var toRickshaw = function(db, cursor, units, cb) {
 						}
 						
 						// switch to new day
-						lastTime = doc.time;
+						lastTime = time;
 						num = 1;
 					} else { // same day
 						for (var col in row) {
 							if (typeof doc[col] == 'number') {
 								row[col] += doc[col];
 							} else {
-								console.warn(doc.time + ': ' + col + ' == ' + doc[col]);
+								console.warn(time + ': ' + col + ' == ' + doc[col]);
 							}
 						}
 						num++;
 					}
 				} else {
-					lastTime = doc.time;
-					lastTime.setHours(0);
-					lastTime.setMinutes(0);
-					lastTime.setSeconds(0);
-					lastTime.setMilliseconds(0);
+					lastTime = time;
 					num = 1;
 					
 					for (var col in doc) {
