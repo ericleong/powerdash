@@ -210,7 +210,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 							if (map[col]) {
 								if (row[col] && num) {
 									map[col].push({
-										x: parseInt(moment(lastTime).format('X'), 10),
+										x: parseInt(moment.tz(lastTime, 'America/New_York').format('X'), 10),
 										y: row[col] / num
 									});
 								} else {
@@ -218,7 +218,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 								}
 							} else {
 								map[col] = [ {
-									x: parseInt(moment(lastTime).format('X'), 10),
+									x: parseInt(moment.tz(lastTime, 'America/New_York').format('X'), 10),
 									y: row[col] / num
 								} ];
 							}
