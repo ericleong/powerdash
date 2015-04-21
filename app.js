@@ -40,10 +40,10 @@ app.get('/', function(req, res) {
 			dgm: 'x-pml:/diagrams/ud/41cooper.dgm',
 			variables: ['SRV1PKW', 'SV2PKW', 'Total KW']
 		},
-		{
-			dgm: 'cogen',
-			variables: ['kW Production']
-		}
+		// {
+		// 	dgm: 'cogen',
+		// 	variables: ['kW Production']
+		// }
 		]),
 		unit: 'kW',
 		min: 0,
@@ -385,7 +385,7 @@ if (app.get('env') == 'production' && process.env.AUTH) {
 var scrapeList = require('./scrape.json');
 
 if (auth) {
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 2; i++) {
 		if (scrapeList[i].type == 'ntlm') {
 			setInterval(scrape.pollNtlm, scrapeList[i].delay * 1000, auth.ntlm.request, auth.ntlm.auth, auth.ntlm.type1_msg, io, scrapeList[i].dgm, scrapeList[i].node, scrapeList[i].desired);
 		} else if (scrapeList[i].type == 'modbus') {
