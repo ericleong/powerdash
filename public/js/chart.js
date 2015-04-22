@@ -40,15 +40,15 @@ function setPaused(paused) {
 	setElapsed();
 
 	if (paused) {
-		emitStream('pause');
-
 		$('#pause').val('resume');
 		$('#pause').data('paused', true);
-	} else {
-		loadPoints();
 
+		emitStream('pause');
+	} else {
 		$('#pause').val('pause');
 		$('#pause').data('paused', false);
+
+		loadPoints();
 	}
 }
 
@@ -117,7 +117,9 @@ function loadSeries(dgm, variables) {
 	};
 
 	socket.emit('load', set);
-	socket.emit('update', dgm);
+	if (!$('#pause').data('paused')) {
+		socket.emit('update', dgm);
+	}
 }
 
 function addSeries(dgm, variables) {
