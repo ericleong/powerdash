@@ -156,11 +156,13 @@ var prepareSeries = function(s) {
 	s.display = $('<div/>').addClass('display');
 	$('<div/>').addClass('name').text(s.name).appendTo(s.display);
 	s.value = $('<div/>').addClass('value').appendTo(s.display);
-	
+
 	if (s.unit) {
-		s.value.text(s.data[s.data.length - 1].y);
-	} else {
 		s.value.text(s.data[s.data.length - 1].y + ' ' + s.unit);
+	} else if (unit) {
+		s.value.text(s.data[s.data.length - 1].y + ' ' + unit);
+	} else {
+		s.value.text(s.data[s.data.length - 1].y);
 	}
 
 	return s;
@@ -200,10 +202,22 @@ function createGraph(dataset) {
 		return b.name.localeCompare(a.name);
 	});
 
+	var date;
+
 	for (var i in series) {
 		prepareSeries(series[i]);
 
+		var d = new Date(series[i].data[series[i].data.length - 1].x * 1000);
+		if (date === undefined || d > date) {
+			date = d;
+		}
+
 		$('#current-data').prepend(series[i].display);
+	}
+
+	if (date) {
+		$('#last-date').text(moment(date).format('l'));
+		$('#last-time').text(moment(date).format('hh:mm:ss a'));
 	}
 	
 	var size = graphSize();
@@ -238,6 +252,8 @@ function createGraph(dataset) {
 
 			if (series.unit) {
 				top = series.name + ':&nbsp;' + formattedY + '&nbsp;' + series.unit;
+			} else if (unit) {
+				top = series.name + ':&nbsp;' + formattedY + '&nbsp;' + unit;
 			} else {
 				top = series.name + ':&nbsp;' + formattedY;
 			}
@@ -321,7 +337,6 @@ function createGraph(dataset) {
 			} else {
 				return Rickshaw.Fixtures.Number.formatKMBT(y);
 			}
-			
 		},
 		element : document.getElementById('y-axis'),
 	});
@@ -349,19 +364,24 @@ socket.on('update', function(dataset) {
 			for (var j in series) {
 				if (series[j] && series[j].id == dataset[i].name) {
 					series[j].data = series[j].data.concat(dataset[i].data); // append new data
+
 					if (series[j].unit) {
 						series[j].value.text(series[j].data[series[j].data.length - 1].y + ' ' + series[j].unit); // display number
+					} else if (unit) {
+						series[j].value.text(series[j].data[series[j].data.length - 1].y + ' ' + unit); // display default unit
 					} else {
-						series[j].value.text(series[j].data[series[j].data.length - 1].y); // display number
+						series[j].value.text(series[j].data[series[j].data.length - 1].y);
 					}
 
 					var d = new Date(series[j].data[series[j].data.length - 1].x * 1000);
-					if (date === undefined || d > date)
+					if (date === undefined || d > date) {
 						date = d;
+					}
 
 					// remove data if we have more data than the amount of time elapsed
-					if (series[j].data[series[j].data.length-1].x - series[j].data[0].x > elapsed)
+					if (series[j].data[series[j].data.length-1].x - series[j].data[0].x > elapsed) {
 						series[j].data.splice(0, dataset[i].data.length);
+					}
 
 					break;
 				}

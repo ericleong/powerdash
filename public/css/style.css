@@ -229,8 +229,19 @@ a.title:hover {
 	overflow: visible;
 }
 
+.rickshaw_graph .detail {
+	line-height: 1.5;
+}
+
 .rickshaw_graph .detail .x_label { 
 	display: none;
+	font-size: 12pt;
+}
+
+.rickshaw_graph .detail .item { 
+	padding: .5em;
+	margin-top: -1.25em;
+	font-size: 10pt;
 }
 
 footer {
