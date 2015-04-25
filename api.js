@@ -17,11 +17,14 @@ var toRickshaw = function(db, cursor, units, cb) {
 	
 	async.waterfall([function(callback) {
 		// get document count
-		cursor.count(function(err, count) {
-			callback(null, count);
-		});
+		cursor.count(callback);
 	}],
 	function(err, count) {
+		if (err) {
+			cb(err);
+			return;
+		}
+
 		// build a map of columns to data
 		var map = {};
 		
@@ -31,34 +34,7 @@ var toRickshaw = function(db, cursor, units, cb) {
 
 		var offset = new Date().getTimezoneOffset() * 60 * 1000;
 
-		cursor.each(function(err, doc) {
-			if (err) {
-				console.error('error converting to rickshaw');
-				console.dir(err);
-
-				cb('error converting to rickshaw');
-			}
-			
-			if (doc == null) {
-				db.close();
-				
-				// convert map into list
-				var list = [];
-				
-				for (var key in map) {
-					list.push({
-						name : humanize[key] ? humanize[key] : key,
-						raw : key,
-						id : key,
-						unit: units[key], 
-						data : map[key]
-					});
-				}
-				cb(null, list);
-				
-				return;
-			}
-			
+		cursor.forEach(function(doc) {
 			if (count <= 60*24*2) {
 				for (var col in doc) {
 					if (col == 'time' || col == '_id')
@@ -254,6 +230,26 @@ var toRickshaw = function(db, cursor, units, cb) {
 					}
 				}
 			}
+		}, function(err) {
+			db.close();
+				
+			if (err) {
+				cb(err);
+			} else {
+				// convert map into list
+				var list = [];
+				
+				for (var key in map) {
+					list.push({
+						name : humanize[key] ? humanize[key] : key,
+						raw : key,
+						id : key,
+						unit: units[key], 
+						data : map[key]
+					});
+				}
+				cb(null, list);
+			}
 		});
 	});
 };
@@ -263,22 +259,8 @@ var toCSV = function(db, cursor, units, callback) {
 	
 	var csv = '';
 	var header = [];
-	
-	cursor.each(function(err, doc) {
-		if (err) {
-			console.log('error ')
-			console.dir(err);
 
-			callback(null);
-			return;
-		}
-		
-		if (doc == null) {
-			db.close();
-			callback(null, csv);
-			return;
-		}
-		
+	cursor.forEach(function(doc) {
 		if (header.length == 0) {
 			header.push('time');
 			
@@ -304,21 +286,32 @@ var toCSV = function(db, cursor, units, callback) {
 		if (row) {
 			csv += '\n' + row.toString();
 		}
+	}, function(err) {
+		db.close();
+
+		if (err) {
+			callback(err);
+		} else {
+			callback(null, csv);
+		}
 	});
 };
 
 var diff = function(db, cursor, units, callback) {
 	var first, last;
 
-	cursor.each(function(err, doc) {
-
-		if (err) {
-			res.send(500, 'Error retrieving water data.')
+	cursor.forEach(function(doc) {
+		if (first === undefined) {
+			first = doc;
 		}
 
-		if (doc == null) {
-			db.close()
+		last = doc;
+	}, function(err) {
+		db.close()
 
+		if (err) {
+			callback(err);
+		} else {
 			var diff = {};
 
 			for (var col in last) {
@@ -328,14 +321,7 @@ var diff = function(db, cursor, units, callback) {
 			}
 
 			callback(null, diff);
-			return;
 		}
-
-		if (first === undefined) {
-			first = doc;
-		}
-
-		last = doc;
 	});
 };
 
@@ -365,25 +351,17 @@ var getLatest = function(dgm, callback) {
 	
 	/* Connect to the DB and auth */
 	MongoClient.connect(mongourl, function(err, db) {
-		if(err) { return console.dir(err); }
+		if (err) {
+			callback(err);
+		} else {
+			var collection = db.collection(cleanDGM(dgm));
 		
-		var collection = db.collection(cleanDGM(dgm));
-		
-		// get the time of the newest datapoint in the database
-		collection.find().sort({time: -1}).limit(1).nextObject(function(err, item) {
-			if (!err && item) {
+			// get the time of the newest datapoint in the database
+			collection.find().sort({time: -1}).limit(1).nextObject(function(err, item) {
 				db.close();
-				callback(item);
-			} else {
-				db.close();
-
-				console.warn('error getting newest datapoint for: ' + dgm);
-				if (err) {
-					console.warn(err.stack);
-				}
-				callback();
-			}
-		});
+				callback(err, item);
+			});
+		}
 	});
 };
 
@@ -464,10 +442,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 	/* Connect to the DB and auth */
 	MongoClient.connect(mongourl, function(err, db) {
 		if (err) { 
-			console.error('error connecting to mongodb!');
-			console.error(err.stack); 
-			cb();
-
+			cb(err);
 			return;
 		}
 		
@@ -503,15 +478,8 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 			
 			callback(null, db, cursor, units);
 		}, processor
-		],
-		function(err, processed) {
-			if (!err) {
-				cb(processed);
-			} else {
-				cb();
-			}
-		});
-});
+		], cb);
+	});
 };
 
 var getRange = function(dgm, start, end, desired, processor, cb) {
@@ -521,7 +489,10 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 	
 	/* Connect to the DB and auth */
 	MongoClient.connect(mongourl, function(err, db) {
-		if(err) { return console.dir(err); }
+		if (err) { 
+			cb(err);
+			return;
+		}
 		
 		var collection = db.collection(cleanDGM(dgm));
 
@@ -542,10 +513,7 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 				
 				callback(null, db, cursor, units);
 			}, processor
-		],
-		function(err, processed) {
-			cb(processed);
-		});
+		], cb);
 	});
 };
 
@@ -658,13 +626,7 @@ var generateCSV = function(dgms, variables, method, cb) {
 			cb(null, csv)
 		});	
 	} else {
-		method(dgms[0], variables, toCSV, function(err, data) {
-			if (data) {
-				cb(null, data)
-			} else {
-				cb('Could not retrieve data.');
-			}
-		});
+		method(dgms[0], variables, toCSV, cb);
 	}
 };
 
@@ -722,9 +684,9 @@ var upload = function(dgm, file, callback) {
 
 					if (err) {
 						if (err.message) {
-							console.log(err.message);
+							console.warn(err.message);
 						} else {
-							console.log('error saving data @ ' + row[0]);
+							console.warn('error saving data @ ' + row[0]);
 						}
 					}
 

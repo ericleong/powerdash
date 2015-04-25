@@ -139,14 +139,10 @@ app.get('/watersaved', function(req, res) {
 
 	async.parallel({
 		latest: function(callback) {
-			api.getLatest(dgm, function(data) {
-				callback(null, data);
-			});
+			api.getLatest(dgm, callback);
 		},
 		amount: function(callback) {
-			api.getRecent(dgm, elapsed, variables, api.diff, function(data) {
-				callback(null, data);
-			});
+			api.getRecent(dgm, elapsed, variables, api.diff, callback);
 		}
 	}, function(err, results) {
 		res.render('save', {
@@ -311,9 +307,7 @@ app.get('/range', function(req, res) {
 
 		api.generateCSV(dgm.split(','), variables, 
 			function(dgm, variables, method, callback) {
-				api.getRange(dgm, range.start, range.end, variables, method, function(data) {
-					callback(null, data);
-				});
+				api.getRange(dgm, range.start, range.end, variables, method, callback);
 			}, function(err, data) {
 				if (err) {
 					res.send(500, err);
@@ -324,8 +318,12 @@ app.get('/range', function(req, res) {
 			}
 		);
 	} else {
-		api.getRange(dgm, range.start, range.end, variables, api.toRickshaw, function(list) {
-			res.json(list);
+		api.getRange(dgm, range.start, range.end, variables, api.toRickshaw, function(err, list) {
+			if (err) {
+				res.send(500, err);
+			} else {
+				res.json(list);
+			}
 		});
 	}
 });
@@ -343,8 +341,12 @@ app.get('/recent/diff', function(req, res) {
 	var dgm = req.query['dgm'] ? req.query['dgm'] : 'x-pml:/diagrams/ud/41cooper/greywater.dgm'; 
 	
 	api.getRecent(dgm, elapsed,
-		variables, api.diff, function(data) {
-			res.json(data);
+		variables, api.diff, function(err, data) {
+			if (err) {
+				res.send(500, err);
+			} else {
+				res.json(list);
+			}
 		});
 });
 
@@ -355,11 +357,14 @@ io.sockets.on('connection', function(socket) {
 	socket.on('load', function(query) {
 		query.dgm = query.dgm ? query.dgm : 'x-pml:/diagrams/ud/41cooper.dgm';  
 		api.getRecent(query.dgm, query.elapsed, 
-			query.variables, api.toRickshaw, function(list) {
+			query.variables, api.toRickshaw, function(err, list) {
 				if (list && list.length > 0) {
 					socket.emit('dataset', list);
 				} else {
 					console.warn('could not load data for ' + query.dgm + ' @ ' + query.elapsed + ' & ' + query.variables);
+					if (err) {
+						console.warn(err);
+					}
 				}
 			});
 	});

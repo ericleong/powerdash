@@ -157,7 +157,12 @@ function pollNtlm(options, auth, type1_msg, io, dgm, node, desired) {
 								if (result.DiagramInput === undefined || err) {
 									console.error('Error parsing data for: ' + dgm);
 								} else {
-									getLatest(dgm, function(latestItem) {
+									getLatest(dgm, function(err, latestItem) {
+										if (err) {
+											console.warn(err);
+											return;
+										}
+
 										var lastSavedAt = result.DiagramInput['$'].savedAt;
 
 										// retrieved times are in new york time
@@ -330,7 +335,12 @@ function pollModbus(name, ip, io, desired) {
 				}
 			}
 			
-			getLatest(name, function(latestItem) {
+			getLatest(name, function(err, latestItem) {
+				if (err) {
+					console.warn(err);
+					return;
+				}
+
 				var currentTime = new Date();
 				var currentTimestamp = currentTime.getTime();
 				// make sure time doesn't go backwards
