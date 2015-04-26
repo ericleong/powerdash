@@ -81,7 +81,7 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 		return;
 	}
 
-	if (!req.files || !req.files.csv || !req.files.csv.path || req.files.csv.path.length == 0) {
+	if (!req.files || !req.files.csv || req.files.csv.size == 0 || !req.files.csv.path || req.files.csv.path.length == 0) {
 		res.render('upload', {
 			setname: 'upload',
 			error: 'No file provided.'
@@ -145,14 +145,18 @@ app.get('/watersaved', function(req, res) {
 			api.getRecent(dgm, elapsed, variables, api.diff, callback);
 		}
 	}, function(err, results) {
-		res.render('save', {
-			dgm: dgm,
-			variables: variables,
-			elapsed: elapsed,
-			setname: 'Water Saved',
-			amount: results.amount[variable],
-			latest: results.latest[variable]
-		});
+		if (err) {
+			res.render(500, err);
+		} else {
+			res.render('save', {
+				dgm: dgm,
+				variables: variables,
+				elapsed: elapsed,
+				setname: 'Water Saved',
+				amount: results.amount[variable],
+				latest: results.latest[variable]
+			});
+		}
 	});
 });
 
@@ -236,13 +240,11 @@ app.get('/recent', function(req, res) {
 	if (req.query['format'] == 'csv') {
 		api.generateCSV(dgm.split(','), variables, 
 			function(dgm, variables, method, callback) {
-				api.getRecent(dgm, elapsed, variables, method, function(data) {
-					callback(null, data);
-				});
+				api.getRecent(dgm, elapsed, variables, method, callback);
 			}, 
 			function(err, data) {
 				if (err) {
-					res.send(500, err);
+					res.status(500).send(err);
 				} else {
 					res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
 					res.send(data);
@@ -250,8 +252,12 @@ app.get('/recent', function(req, res) {
 			}
 		);
 	} else {
-		api.getRecent(dgm, elapsed, variables, api.toRickshaw, function(list) {
-			res.json(list);
+		api.getRecent(dgm, elapsed, variables, api.toRickshaw, function(err, list) {
+			if (err) {
+				res.status(500).send(err);
+			} else {
+				res.json(list);
+			}
 		});
 	}
 });
@@ -280,7 +286,7 @@ var getDateRange = function(req) {
 
 app.get('/range', function(req, res) {
 	if (!req.query['start']) {
-		res.send(400, 'Need start time!');
+		res.status(400).send('Need start time!');
 		return;
 	}
 
@@ -298,7 +304,7 @@ app.get('/range', function(req, res) {
 	var range = getDateRange(req);
 
 	if (range.start >= range.end) {
-		res.send(400, 'Need valid range!');
+		res.status(400).send('Need valid range!');
 		return;
 	}
 
@@ -310,7 +316,7 @@ app.get('/range', function(req, res) {
 				api.getRange(dgm, range.start, range.end, variables, method, callback);
 			}, function(err, data) {
 				if (err) {
-					res.send(500, err);
+					res.status(500).send(err);
 				} else {
 					res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
 					res.send(data);
@@ -320,7 +326,7 @@ app.get('/range', function(req, res) {
 	} else {
 		api.getRange(dgm, range.start, range.end, variables, api.toRickshaw, function(err, list) {
 			if (err) {
-				res.send(500, err);
+				res.status(500).send(err);
 			} else {
 				res.json(list);
 			}
@@ -343,7 +349,7 @@ app.get('/recent/diff', function(req, res) {
 	api.getRecent(dgm, elapsed,
 		variables, api.diff, function(err, data) {
 			if (err) {
-				res.send(500, err);
+				res.status(500).send(err);
 			} else {
 				res.json(list);
 			}

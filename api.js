@@ -12,249 +12,130 @@ var mongourl = mongo.getMongoUrl();
 
 var humanize = require('./humanize.json');
 
-var toRickshaw = function(db, cursor, units, cb) {
-	// map database to dictionary
+var toRickshaw = function(db, cursor, duration, units, cb) {
+
+	// build a map of columns to data
+	var map = {};
 	
-	async.waterfall([function(callback) {
-		// get document count
-		cursor.count(callback);
-	}],
-	function(err, count) {
-		if (err) {
-			cb(err);
-			return;
+	var lastTime = undefined;
+	var row = {};
+	var num = 0;
+	
+	var reset;
+
+	if (duration > 1000*60*60*6) {  // 6 hours
+
+		reset = ['millisecond', 'second']; // group by minute
+
+		if (duration > 1000*60*60*24*7) { // 1 week
+			reset.push('minute'); // group by hour
 		}
 
-		// build a map of columns to data
-		var map = {};
-		
-		var lastTime = undefined;
-		var row = {};
-		var num = 0;
+		if (duration > 1000*60*60*24*7*4) { // 1 month
+			reset.push('hour'); // group by day
+		}
+	}
 
-		var offset = new Date().getTimezoneOffset() * 60 * 1000;
+	cursor.forEach(function(doc) {
+		if (reset === undefined) {
+			for (var col in doc) {
+				if (col == 'time' || col == '_id')
+					continue;
+				
+				if (map[col]) {
+					map[col].push({
+						x : parseInt(moment(doc.time).format('X'), 10),
+						y : doc[col]
+					});
+				} else {
+					map[col] = [ {
+						x : parseInt(moment(doc.time).format('X'), 10),
+						y : doc[col]
+					} ];
+				}
+			}
+		} else {
 
-		cursor.forEach(function(doc) {
-			if (count <= 60*24*2) {
+			var time = moment.tz(doc.time, 'America/New_York');
+			for (var r in reset) {
+				time.set(reset[r], 0);
+			}
+
+			if (lastTime) {
+				// new block
+				if (!time.isSame(lastTime)) {
+					// save previous block
+					for (var col in row) {
+						if (map[col]) {
+							if (row[col] && num) {
+								map[col].push({
+									x: parseInt(lastTime.format('X'), 10),
+									y: row[col] / num
+								});
+							} else {
+								console.warn(lastTime + ': ' + row[col] + ' ' + num);
+							}
+						} else {
+							map[col] = [ {
+								x: parseInt(lastTime.format('X'), 10),
+								y: row[col] / num
+							} ];
+						}
+					}
+					
+					for (var col in row) {
+						row[col] = doc[col];
+					}
+					
+					// switch to new block
+					lastTime = time;
+					num = 1;
+				} else { // same block
+					for (var col in row) {
+						if (typeof doc[col] == 'number') {
+							row[col] += doc[col];
+						} else {
+							console.warn(time + ': ' + col + ' == ' + doc[col]);
+						}
+					}
+					num++;
+				}
+			} else {
+				lastTime = time;
+				num = 1;
+				
 				for (var col in doc) {
 					if (col == 'time' || col == '_id')
 						continue;
 					
-					if (map[col]) {
-						map[col].push({
-							x : parseInt(moment(doc.time).format('X'), 10),
-							y : doc[col]
-						});
-					} else {
-						map[col] = [ {
-							x : parseInt(moment(doc.time).format('X'), 10),
-							y : doc[col]
-						} ];
-					}
-				}
-			} else if (count <= 60*24*4) {
-				// minute by minute intervals
-				
-				if (lastTime) {
-					// new minute
-					if (doc.time.getMinutes() != lastTime.getMinutes()) {
-						lastTime.setSeconds(0);
-						lastTime.setMilliseconds(0);
-						
-						// save previous minute
-						for (var col in row) {
-							if (map[col]) {
-								if (row[col] && num) {
-									map[col].push({
-										x: parseInt(moment(lastTime).format('X'), 10),
-										y: row[col] / num
-									});
-								} else {
-									console.warn(lastTime + ': ' + row[col] + ' ' + num);
-								}
-							} else {
-								map[col] = [ {
-									x: parseInt(moment(lastTime).format('X'), 10),
-									y: row[col] / num
-								} ];
-							}
-						}
-						
-						for (var col in row) {
-							row[col] = doc[col];
-						}
-						
-						// switch to new minute
-						lastTime = doc.time;
-						num = 1;
-					} else { // same minute
-						for (var col in row) {
-							if (typeof doc[col] == 'number') {
-								row[col] += doc[col];
-							} else {
-								console.warn(doc.time + ': ' + col + ' == ' + doc[col]);
-							}
-						}
-						num++;
-					}
-				} else {
-					lastTime = doc.time;
-					lastTime.setSeconds(0);
-					lastTime.setMilliseconds(0);
-					num = 1;
-					
-					for (var col in doc) {
-						if (col == 'time' || col == '_id')
-							continue;
-						
-						row[col] = doc[col];
-					}
-				}
-			} else if (count <= 60*24*7) {
-				// hour-by-hour intervals
-
-				if (lastTime) {
-					// new hour
-					if (doc.time.getHours() != lastTime.getHours()) {
-						lastTime.setMinutes(0);
-						lastTime.setSeconds(0);
-						lastTime.setMilliseconds(0);
-						
-						// save previous hour
-						for (var col in row) {
-							if (map[col]) {
-								if (row[col] && num) {
-									map[col].push({
-										x: parseInt(moment(lastTime).format('X'), 10),
-										y: row[col] / num
-									});
-								} else {
-									console.warn(lastTime + ': ' + row[col] + ' ' + num);
-								}
-							} else {
-								map[col] = [ {
-									x: parseInt(moment(lastTime).format('X'), 10),
-									y: row[col] / num
-								} ];
-							}
-						}
-						
-						for (var col in row) {
-							row[col] = doc[col];
-						}
-						
-						// switch to new hour
-						lastTime = doc.time;
-						num = 1;
-					} else { // same hour
-						for (var col in row) {
-							if (typeof doc[col] == 'number') {
-								row[col] += doc[col];
-							} else {
-								console.warn(doc.time + ': ' + col + ' == ' + doc[col]);
-							}
-						}
-						num++;
-					}
-				} else {
-					lastTime = doc.time;
-					lastTime.setMinutes(0);
-					lastTime.setSeconds(0);
-					lastTime.setMilliseconds(0);
-					num = 1;
-					
-					for (var col in doc) {
-						if (col == 'time' || col == '_id')
-							continue;
-						
-						row[col] = doc[col];
-					}
-				}
-			} else {
-				// day-by-day intervals
-
-				var time = moment.tz(doc.time, 'America/New_York');
-				time.hours(0);
-				time.minutes(0);
-				time.seconds(0);
-				time.milliseconds(0);
-
-				if (lastTime) {
-					// new day
-					if (!time.isSame(lastTime)) {
-						// save previous day
-						for (var col in row) {
-							if (map[col]) {
-								if (row[col] && num) {
-									map[col].push({
-										x: parseInt(lastTime.format('X'), 10),
-										y: row[col] / num
-									});
-								} else {
-									console.warn(lastTime + ': ' + row[col] + ' ' + num);
-								}
-							} else {
-								map[col] = [ {
-									x: parseInt(lastTime.format('X'), 10),
-									y: row[col] / num
-								} ];
-							}
-						}
-						
-						for (var col in row) {
-							row[col] = doc[col];
-						}
-						
-						// switch to new day
-						lastTime = time;
-						num = 1;
-					} else { // same day
-						for (var col in row) {
-							if (typeof doc[col] == 'number') {
-								row[col] += doc[col];
-							} else {
-								console.warn(time + ': ' + col + ' == ' + doc[col]);
-							}
-						}
-						num++;
-					}
-				} else {
-					lastTime = time;
-					num = 1;
-					
-					for (var col in doc) {
-						if (col == 'time' || col == '_id')
-							continue;
-						
-						row[col] = doc[col];
-					}
+					row[col] = doc[col];
 				}
 			}
-		}, function(err) {
-			db.close();
-				
-			if (err) {
-				cb(err);
-			} else {
-				// convert map into list
-				var list = [];
-				
-				for (var key in map) {
-					list.push({
-						name : humanize[key] ? humanize[key] : key,
-						raw : key,
-						id : key,
-						unit: units[key], 
-						data : map[key]
-					});
-				}
-				cb(null, list);
+		}
+	}, function(err) {
+		db.close();
+			
+		if (err) {
+			cb(err);
+		} else {
+			// convert map into list
+			var list = [];
+			
+			for (var key in map) {
+				list.push({
+					name : humanize[key] ? humanize[key] : key,
+					raw : key,
+					id : key,
+					unit: units[key], 
+					data : map[key]
+				});
 			}
-		});
+			cb(null, list);
+		}
 	});
 };
 
-var toCSV = function(db, cursor, units, callback) {
+var toCSV = function(db, cursor, duration, units, callback) {
 	// creates a csv file
 	
 	var csv = '';
@@ -297,7 +178,7 @@ var toCSV = function(db, cursor, units, callback) {
 	});
 };
 
-var diff = function(db, cursor, units, callback) {
+var diff = function(db, cursor, duration, units, callback) {
 	var first, last;
 
 	cursor.forEach(function(doc) {
@@ -325,7 +206,7 @@ var diff = function(db, cursor, units, callback) {
 	});
 };
 
-var toArray = function(db, cursor, units, callback) {
+var toArray = function(db, cursor, duration, units, callback) {
 	// creates a map
 
 	cursor.toArray(function(err, results) {
@@ -456,12 +337,11 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 				if (!err && item) {
 					callback(null, item.time, projection, units);
 				} else {
-					console.warn('error getting newest datapoint from ' + dgm);
 					if (err) {
 						console.warn(err.stack);
 						callback(err);
 					} else {
-						callback('error getting newest datapoint!');
+						callback('error getting newest datapoint from ' + dgm);
 					}
 				}
 			});
@@ -476,7 +356,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 			
 			cursor.sort({time: 1});
 			
-			callback(null, db, cursor, units);
+			callback(null, db, cursor, elapsed, units);
 		}, processor
 		], cb);
 	});
@@ -511,7 +391,7 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 				
 				cursor.sort({time: 1});
 				
-				callback(null, db, cursor, units);
+				callback(null, db, cursor, end - start, units);
 			}, processor
 		], cb);
 	});
@@ -669,28 +549,23 @@ var upload = function(dgm, file, callback) {
 
 				fs.unlink(file);
 
-				if (parseErrors.length > 0) {
-					callback(null, {
-						lines: validLineCount,
-						errors: parseErrors
-					});
-				} else {
-					callback(null, {
-						lines: validLineCount
-					});
-				}
-
 				batch.execute(function(err, result) {
+					db.close();
 
 					if (err) {
-						if (err.message) {
-							console.warn(err.message);
+						callback(err);
+					} else {
+						if (parseErrors.length > 0) {
+							callback(null, {
+								lines: validLineCount,
+								errors: parseErrors
+							});
 						} else {
-							console.warn('error saving data @ ' + row[0]);
+							callback(null, {
+								lines: validLineCount
+							});
 						}
 					}
-
-					db.close();
 				});
 			});
 
