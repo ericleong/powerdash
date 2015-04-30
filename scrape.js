@@ -1,6 +1,5 @@
 'use strict';
 
-
 var async = require('async'),
 	util = require('util'),
 	moment = require('moment-timezone'),
@@ -22,7 +21,7 @@ function convertItem(item, time) {
 			x: time,
 			y: parseInt(item.rv, 10)
 		}]
-};
+	};
 }
 
 function simplifyNtlmItems(items, time, desired) {

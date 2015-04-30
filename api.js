@@ -188,7 +188,7 @@ var diff = function(db, cursor, duration, units, callback) {
 
 		last = doc;
 	}, function(err) {
-		db.close()
+		db.close();
 
 		if (err) {
 			callback(err);
@@ -403,8 +403,6 @@ var generateCSV = function(dgms, variables, method, cb) {
 			method(dgm, variables, toArray, callback);
 		};
 
-		var results = {};
-
 		async.map(dgms, genArray, function(err, results) {
 
 			var csv = '';
@@ -466,7 +464,7 @@ var generateCSV = function(dgms, variables, method, cb) {
 					}
 				}
 
-				minTimeStr = moment(minTime).tz('America/New_York').format('DD-MMM-YY HH:mm:ss');
+				var minTimeStr = moment(minTime).tz('America/New_York').format('DD-MMM-YY HH:mm:ss');
 
 				// build the row for this time
 				var row = {};
@@ -503,7 +501,7 @@ var generateCSV = function(dgms, variables, method, cb) {
 				}
 			} while (!finished);
 
-			cb(null, csv)
+			cb(null, csv);
 		});	
 	} else {
 		method(dgms[0], variables, toCSV, cb);
@@ -637,7 +635,7 @@ var upload = function(dgm, file, callback) {
 			});
 		});
 	});
-}
+};
 
 module.exports.getRange = getRange;
 module.exports.getLatest = getLatest;

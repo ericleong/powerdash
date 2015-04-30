@@ -1,3 +1,4 @@
+/// <reference path="../../typings/jquery/jquery.d.ts"/>
 'use strict';
 
 var socket = io.connect(host);
@@ -397,6 +398,10 @@ socket.on('update', function(dataset) {
 	}
 });
 
+var seriesSort = function(a, b) {
+	return b.name.localeCompare(a.name);
+};
+
 socket.on('dataset', function(dataset) {
 	if (graph === undefined) {
 		$('#chart').removeClass('loading');
@@ -416,9 +421,7 @@ socket.on('dataset', function(dataset) {
 			if (!added) {
 				series.push(prepareSeries(dataset[i]));
 
-				series.sort(function(a, b) {
-					return b.name.localeCompare(a.name);
-				});
+				series.sort(seriesSort);
 
 				$('#current-data').empty();
 				for (var i in series) {
@@ -448,7 +451,6 @@ socket.on('dataset', function(dataset) {
 
 			for (var i in series) {
 				if (series[i].data && series[i].data.length > 0) {
-					var firstTime = series[i].data[0].x;
 					var lastTime = series[i].data[series[i].data.length - 1].x;
 
 					// disable series if we have old data

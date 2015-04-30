@@ -1,3 +1,4 @@
+/// <reference path="typings/node/node.d.ts"/>
 'use strict';
 
 var express = require('express'),
@@ -100,7 +101,7 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 		} else if (results && results.errors) {
 			res.render('upload', {
 				setname: 'upload',
-				error: errors.join('<br>'),
+				error: results.errors.join('<br>'),
 				file: req.files.csv.name,
 				dgm: dgm
 			});
@@ -351,7 +352,7 @@ app.get('/recent/diff', function(req, res) {
 			if (err) {
 				res.status(500).send(err);
 			} else {
-				res.json(list);
+				res.json(data);
 			}
 		});
 });
@@ -404,5 +405,5 @@ if (auth) {
 		}
 	}
 } else {
-	console.error('Could not find auth.json or AUTH environment variable.')
+	console.error('Could not find auth.json or AUTH environment variable.');
 }
