@@ -167,8 +167,9 @@ function pollNtlm(options, auth, type1_msg, io, dgm, node, desired) {
 										// retrieved times are in new york time
 										// make sure to convert to milliseconds
 										var lastSavedAtTimestamp = parseInt(moment.tz(lastSavedAt, 'America/New_York').format('X'), 10) * 1000;
-
-										if (lastSavedAtTimestamp && (latestItem === undefined || lastSavedAtTimestamp > latestItem.time.getTime())) { // defensive
+										var latestTime = latestItem && latestItem.time ? latestItem.time.getTime() : undefined;
+										
+										if (lastSavedAtTimestamp && (latestTime == null || lastSavedAtTimestamp > latestTime)) { // defensive
 											// print time that the data was saved at
 											console.log(dgm + ' @ ' + lastSavedAt);
 											

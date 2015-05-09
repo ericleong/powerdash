@@ -50,8 +50,7 @@ app.get('/', function(req, res) {
 		min: 0,
 		elapsed: 2 * 60 * 60 * 1000,
 		setname: 'Electricity Consumption',
-		description: 'The utility electricity usage.',
-		message: ''
+		description: 'The utility electricity usage.'
 	});
 });
 
@@ -128,7 +127,8 @@ app.get('/water', function(req, res) {
 		elapsed: 2 * 60 * 60 * 1000,
 		setname: 'Rainwater Collection',
 		description: 'Water saved since Fall 2009.',
-		unit: 'gl'
+		unit: 'gl',
+		message: 'This page is under construction.'
 	});
 });
 
@@ -213,7 +213,7 @@ app.get('/breakdown', function(req, res) {
 		elapsed: 2 * 60 * 60 * 1000,
 		setname: 'Electricity Consumption Breakdown',
 		description: 'Usage broken down by location.',
-		message: 'Negative Roof & Mechanical is due to cogeneration.',
+		message: 'This page is under construction.',
 		all: false,
 		disable: JSON.stringify(['Total KW', ])
 	});
