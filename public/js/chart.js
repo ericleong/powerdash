@@ -31,18 +31,22 @@ $('#offset-form input[type=radio]').change(function() {
 	} else if ($(this).val() == 'twentyfour-hours') {
 		setElapsed(24*60*60*1000);
 		setPaused(true);
+		loadPoints();
 		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'two-weeks') {
 		setElapsed(2*7*24*60*60*1000);
 		setPaused(true);
+		loadPoints();
 		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'two-months') {
 		setElapsed(2*4*7*24*60*60*1000); // 2x28 days
 		setPaused(true);
+		loadPoints();
 		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'one-year') {
 		setElapsed(365*24*60*60*1000); // 365 days
 		setPaused(true);
+		loadPoints();
 		$('#pause').prop('disabled', true);
 	}
 });
@@ -145,9 +149,24 @@ $('#download').click(function() {
 
 		window.location.href = '/recent?format=csv&' + variables + 'dgm=' + dgms + '&elapsed=' + elapsed;
 	} else if (series.length > 0) {
+		
+		var start;
+		series.forEach(function(s) {
+			var x = s.data[0].x * 1000;
+			if (start == null || x < start) {
+				start = x;
+			}
+		});
+		
+		var end;
+		series.forEach(function(s) {
+			var x = s.data[s.data.length-1].x * 1000;
+			if (end == null || x > end) {
+				end = x;
+			}
+		});
 
-		window.location.href = '/range?format=csv&' + variables + 'dgm=' + dgms + '&start=' + series[0].data[0].x * 1000 +
-		'&end=' + series[0].data[series[0].data.length-1].x * 1000;
+		window.location.href = '/range?format=csv&' + variables + 'dgm=' + dgms + '&start=' + start + '&end=' + end;
 	}
 });
 

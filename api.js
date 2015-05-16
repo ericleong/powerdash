@@ -1,3 +1,4 @@
+/// <reference path="typings/node/node.d.ts"/>
 'use strict';
 
 var async = require('async'),
@@ -67,7 +68,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 					// save previous block
 					for (var col in row) {
 						if (map[col]) {
-							if (row[col] && num) {
+							if (row[col] >= 0 && num >= 0) {
 								map[col].push({
 									x: parseInt(lastTime.format('X'), 10),
 									y: row[col] / num
@@ -622,7 +623,8 @@ var upload = function(dgm, file, callback) {
 
 							if (!isNaN(val)) {
 								data[header[i]] = val;
-							} else {
+							} else if (dgm.indexOf('meta_') == 0) {
+								// Only insert strings if meta collection
 								data[header[i]] = row[i];
 							}
 						}
