@@ -1,3 +1,6 @@
+/* global io */
+/* global moment */
+/* global Rickshaw */
 /// <reference path="../../typings/jquery/jquery.d.ts"/>
 'use strict';
 
@@ -123,13 +126,6 @@ function loadSeries(dgm, variables) {
 	}
 }
 
-function addSeries(dgm, variables) {
-	loadSeries(dgm, variables);
-	points.push(set);
-
-	buildLegend();
-}
-
 function graphSize() {
 	var width;
 
@@ -177,7 +173,7 @@ var buildLegend = function() {
 		graph : graph
 	});
 
-	var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+	new Rickshaw.Graph.Behavior.Series.Toggle({
 		graph : graph,
 		legend : legend
 	});
@@ -236,7 +232,7 @@ function createGraph(dataset) {
 
 	graph.render();
 
-	var hoverDetail = new Rickshaw.Graph.HoverDetail({
+	new Rickshaw.Graph.HoverDetail({
 		graph: graph,
 		xFormatter: function(x) {
 			var d = moment(x * 1000);
@@ -271,19 +267,19 @@ function createGraph(dataset) {
 		{
 			name: 'decade',
 			seconds: 86400 * 365.25 * 10,
-			formatter: function(d) { return (parseInt(d.getUTCFullYear() / 10, 10) * 10) }
+			formatter: function(d) { return (parseInt(d.getUTCFullYear() / 10, 10) * 10); }
 		}, {
 			name: 'year',
 			seconds: 86400 * 365.25,
-			formatter: function(d) { return d.getUTCFullYear() }
+			formatter: function(d) { return d.getUTCFullYear(); }
 		}, {
 			name: 'month',
 			seconds: 86400 * 30.5,
-			formatter: function(d) { return timeFixture.months[d.getUTCMonth()] }
+			formatter: function(d) { return timeFixture.months[d.getUTCMonth()]; }
 		}, {
 			name: 'week',
 			seconds: 86400 * 7,
-			formatter: function(d) { return timeFixture.formatDate(d) }
+			formatter: function(d) { return timeFixture.formatDate(d); }
 		}, {
 			name: 'day',
 			seconds: 86400,
@@ -291,35 +287,35 @@ function createGraph(dataset) {
 		}, {
 			name: '6 hour',
 			seconds: 3600 * 6,
-			formatter: function(d) { return timeFixture.formatTime(d) }
+			formatter: function(d) { return timeFixture.formatTime(d); }
 		}, {
 			name: 'hour',
 			seconds: 3600,
-			formatter: function(d) { return timeFixture.formatTime(d) }
+			formatter: function(d) { return timeFixture.formatTime(d); }
 		}, {
 			name: '15 minute',
 			seconds: 60 * 15,
-			formatter: function(d) { return timeFixture.formatTime(d) }
+			formatter: function(d) { return timeFixture.formatTime(d); }
 		}, {
 			name: 'minute',
 			seconds: 60,
-			formatter: function(d) { return d3.time.format('%I:%M %p')(d) }
+			formatter: function(d) { return d3.time.format('%I:%M %p')(d); }
 		}, {
 			name: '15 second',
 			seconds: 15,
-			formatter: function(d) { return d3.time.format('%I:%M:%S %p')(d) }
+			formatter: function(d) { return d3.time.format('%I:%M:%S %p')(d); }
 		}, {
 			name: 'second',
 			seconds: 1,
-			formatter: function(d) { return d.getUTCSeconds() + 's' }
+			formatter: function(d) { return d.getUTCSeconds() + 's'; }
 		}, {
 			name: 'decisecond',
 			seconds: 1/10,
-			formatter: function(d) { return d.getUTCMilliseconds() + 'ms' }
+			formatter: function(d) { return d.getUTCMilliseconds() + 'ms'; }
 		}, {
 			name: 'centisecond',
 			seconds: 1/100,
-			formatter: function(d) { return d.getUTCMilliseconds() + 'ms' }
+			formatter: function(d) { return d.getUTCMilliseconds() + 'ms'; }
 		}
 	];
 
