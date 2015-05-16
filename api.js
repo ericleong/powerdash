@@ -124,7 +124,6 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 			for (var key in map) {
 				list.push({
 					name : humanize[key] ? humanize[key] : key,
-					raw : key,
 					id : key,
 					unit: units[key], 
 					data : map[key]
@@ -318,6 +317,11 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 var getRecent = function(dgm, elapsed, desired, processor, cb) {
 	// Gets a recent set of data from the database
 	
+	if (dgm == null || dgm.length == 0) {
+		cb('Invalid dgm: ' + dgm);
+		return;
+	}
+	
 	desired = (desired === undefined) ? [] : desired;
 	
 	/* Connect to the DB and auth */
@@ -365,6 +369,11 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 var getRange = function(dgm, start, end, desired, processor, cb) {
 	// Gets data between two times from the database
 	
+	if (dgm == null || dgm.length == 0) {
+		cb('Invalid dgm: ' + dgm);
+		return;
+	}
+	
 	desired = (desired === undefined) ? [] : desired;
 	
 	/* Connect to the DB and auth */
@@ -399,6 +408,7 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 
 var generateCSV = function(dgms, variables, method, cb) {
 	if (dgms.length > 1) {
+		// handling multiple dgms is tricky
 		var genArray = function(dgm, callback) {
 			method(dgm, variables, toArray, callback);
 		};

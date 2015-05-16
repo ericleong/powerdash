@@ -1,6 +1,13 @@
+/* global min */
+/* global disable */
+/* global unit */
+/* global points */
+/* global elapsed */
+/* global host */
 /* global io */
 /* global moment */
 /* global Rickshaw */
+/// <reference path="../../typings/d3/d3.d.ts"/>
 /// <reference path="../../typings/jquery/jquery.d.ts"/>
 'use strict';
 
@@ -14,35 +21,33 @@ var palette = new Rickshaw.Color.Palette();
 
 $('#offset-form input[type=radio]').change(function() {
 	if ($(this).val() == 'two-hours') {
-		elapsed = 2*60*60*1000;
-		$('#pause').attr('disabled', false);
+		$('#pause').prop('disabled', false);
+		setElapsed(2*60*60*1000);
+		loadPoints();
 	} else if ($(this).val() == 'six-hours') {
-		elapsed = 6*60*60*1000;
-		$('#pause').attr('disabled', false);
+		$('#pause').prop('disabled', false);
+		setElapsed(6*60*60*1000);
+		loadPoints();
 	} else if ($(this).val() == 'twentyfour-hours') {
-		elapsed = 24*60*60*1000;
+		setElapsed(24*60*60*1000);
 		setPaused(true);
-		$('#pause').attr('disabled', true);
+		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'two-weeks') {
-		elapsed = 2*7*24*60*60*1000;
+		setElapsed(2*7*24*60*60*1000);
 		setPaused(true);
-		$('#pause').attr('disabled', true);
+		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'two-months') {
-		elapsed = 2*4*7*24*60*60*1000; // 2x28 days
+		setElapsed(2*4*7*24*60*60*1000); // 2x28 days
 		setPaused(true);
-		$('#pause').attr('disabled', true);
+		$('#pause').prop('disabled', true);
 	} else if ($(this).val() == 'one-year') {
-		elapsed = 365*24*60*60*1000; // 365 days
+		setElapsed(365*24*60*60*1000); // 365 days
 		setPaused(true);
-		$('#pause').attr('disabled', true);
+		$('#pause').prop('disabled', true);
 	}
-	setElapsed();
-	loadPoints();
 });
 
 function setPaused(paused) {
-	setElapsed();
-
 	if (paused) {
 		$('#pause').val('resume');
 		$('#pause').data('paused', true);
@@ -56,9 +61,10 @@ function setPaused(paused) {
 	}
 }
 
-function setElapsed() {
+function setElapsed(duration) {
+	elapsed = duration;
 	for (var i in points) {
-		points[i].elapsed = elapsed;
+		points[i].elapsed = duration;
 	}
 }
 
@@ -77,24 +83,70 @@ $('#pause').click(function() {
 });
 
 $('#download').click(function() {
-	var pointsList = '';
+	var disabled = [];
+	
+	if (graph && graph.series) {
+		graph.series.forEach(function(s) { 
+			if (s.disabled && s.id) {
+				disabled.push(s.id);
+			}
+		});
+	}
 
-	for (var p in points) {
-		var point = points[p];
+	var dgms = '';
+	var variablesList = [];
+	var all = false;
 
-		if (p > 0) {
-			pointsList += ',';
-		}
-
-		pointsList += encodeURIComponent(point.dgm);
+	if (points) {
+		points.forEach(function(point) {
+			var includeDgm = false;
+			
+			if (point.variables && point.variables.length > 0) {
+				point.variables.forEach(function(variable) {
+					if (disabled.indexOf(variable) < 0) {
+						variablesList.push(variable);
+						includeDgm = true;
+					}
+				});
+			} else {
+				all = true;
+				includeDgm = true;
+			}
+			
+			if (includeDgm) {
+				if (dgms.length > 0) {
+					dgms += ',';
+				}
+				
+				dgms += encodeURIComponent(point.dgm);
+			}
+		});
+	}
+	
+	var variables;
+	
+	if (all || variablesList.length == 0) {
+		variables = 'variables=all&';
+	} else {
+		variables = '';
+		
+		variablesList.forEach(function(variable) {
+			if (variables.length > 0) {
+				variables += ',';
+			}
+			
+			variables += encodeURIComponent(variable);
+		});
+		
+		variables = 'variables=' + variables + '&';
 	}
 
 	if (!$('#pause').data('paused')) {
 
-		window.location.href = '/recent?format=csv&' + all + 'dgm=' + pointsList + '&elapsed=' + elapsed;
-	} else if (series.length > 0){
+		window.location.href = '/recent?format=csv&' + variables + 'dgm=' + dgms + '&elapsed=' + elapsed;
+	} else if (series.length > 0) {
 
-		window.location.href = '/range?format=csv&' + all + 'dgm=' + pointsList + '&start=' + series[0].data[0].x * 1000 +
+		window.location.href = '/range?format=csv&' + variables + 'dgm=' + dgms + '&start=' + series[0].data[0].x * 1000 +
 		'&end=' + series[0].data[series[0].data.length-1].x * 1000;
 	}
 });
@@ -114,13 +166,11 @@ function loadPoints() {
 }
 
 function loadSeries(dgm, variables) {
-	var set = {
+	socket.emit('load', {
 		dgm: dgm,
 		variables: variables,
 		elapsed: elapsed
-	};
-
-	socket.emit('load', set);
+	});
 	if (!$('#pause').data('paused')) {
 		socket.emit('update', dgm);
 	}
@@ -163,7 +213,7 @@ var prepareSeries = function(s) {
 	}
 
 	return s;
-}
+};
 
 var buildLegend = function() {
 	$('#legend').empty();
@@ -177,19 +227,19 @@ var buildLegend = function() {
 		graph : graph,
 		legend : legend
 	});
-}
+};
 
 var checkEnabled = function() {
 	if (disable) {
 		for (var i in series) {
-			if (disable.length && disable.indexOf(series[i].raw) > -1) {
+			if (disable.length && disable.indexOf(series[i].id) > -1) {
 				series[i].disable();
-			} else if (disable == series[i].raw) {
+			} else if (disable == series[i].id) {
 				series[i].disable();
 			}
 		}
 	}
-}
+};
 
 /* GRAPH */
 function createGraph(dataset) {
@@ -267,7 +317,7 @@ function createGraph(dataset) {
 		{
 			name: 'decade',
 			seconds: 86400 * 365.25 * 10,
-			formatter: function(d) { return (parseInt(d.getUTCFullYear() / 10, 10) * 10); }
+			formatter: function(d) { return (Math.floor(d.getUTCFullYear() / 10) * 10); }
 		}, {
 			name: 'year',
 			seconds: 86400 * 365.25,
@@ -283,7 +333,7 @@ function createGraph(dataset) {
 		}, {
 			name: 'day',
 			seconds: 86400,
-			formatter: function(d) { return moment(d).format('ddd M/D')}
+			formatter: function(d) { return moment(d).format('ddd M/D');}
 		}, {
 			name: '6 hour',
 			seconds: 3600 * 6,

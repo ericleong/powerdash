@@ -214,7 +214,6 @@ app.get('/breakdown', function(req, res) {
 		setname: 'Electricity Consumption Breakdown',
 		description: 'Usage broken down by location.',
 		message: 'This page is under construction.',
-		all: false,
 		disable: JSON.stringify(['Total KW', ])
 	});
 });

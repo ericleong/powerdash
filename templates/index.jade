@@ -16,7 +16,6 @@ html(lang='en')
 			var elapsed = #{elapsed};
 			var min = '#{min}' == '0' ? 0 : '#{min}';
 			var unit = '#{unit}';
-			var all = '#{all}' == '' ? 'variables=all&' : '';
 		if disable
 			script.
 				var disable = JSON.parse(!{JSON.stringify(disable)});
