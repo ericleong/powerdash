@@ -11,17 +11,8 @@ html(lang='en')
 		script(src='//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js')
 		script(src='/js/moment.min.js')
 		script(src='/js/rickshaw.min.js')
-		script.
-			var points = JSON.parse(!{JSON.stringify(points)});
-			var elapsed = #{elapsed};
-			var min = '#{min}' == '0' ? 0 : '#{min}';
-			var unit = '#{unit}';
-		if disable
-			script.
-				var disable = JSON.parse(!{JSON.stringify(disable)});
-		else
-			script.
-				var disable = [];
+		script(src='/js/settings.js')
+		script(src='/js/chart.js')
 	body
 		include includes/header
 		h1.chart-title
@@ -74,5 +65,9 @@ html(lang='en')
 				if message
 					p.message #{message}
 		footer Created by #[a(href='//ericleong.me') Eric Leong] with partial support from the National Science Foundation under #[a(href='//www.nsf.gov/awardsearch/showAward?AWD_ID=1044830') grant no. DUE 104483]
-		script(src='/js/settings.js')
-		script(src='/js/chart.js')
+		if disable
+			script.
+				new dashChart(host, !{points}, !{elapsed}, !{disable}, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
+		else
+			script.
+				new dashChart(host, !{points}, !{elapsed}, null, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
