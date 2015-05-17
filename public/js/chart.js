@@ -473,9 +473,11 @@ dashChart.prototype.graphSize = function() {
 };
 
 dashChart.prototype.createDownloadUrl = function() {
+
+	// create list of disabled series
 	var disabled = [];
-		
-	if (this.graph && this.graph.series) {
+
+	if (this.graph && this.graph.series && this.graph.series.length > 0) {
 		this.graph.series.forEach(function(s) { 
 			if (s.disabled && s.id) {
 				disabled.push(s.id);
@@ -483,6 +485,7 @@ dashChart.prototype.createDownloadUrl = function() {
 		});
 	}
 
+	// build list of dgms and variables
 	var dgms = '';
 	var variablesList = [];
 	var all = false;
@@ -499,6 +502,7 @@ dashChart.prototype.createDownloadUrl = function() {
 					}
 				});
 			} else {
+				// if any series does not specify variables, load all of them
 				all = true;
 				includeDgm = true;
 			}
@@ -511,8 +515,13 @@ dashChart.prototype.createDownloadUrl = function() {
 				dgms += encodeURIComponent(point.dgm);
 			}
 		});
+		
+		if (dgms.length > 0) {
+			dgms = 'dgm=' + dgms + '&';
+		}
 	}
-	
+
+	// convert array of variables into string
 	var variables;
 	
 	if (all || variablesList.length == 0) {
@@ -533,9 +542,10 @@ dashChart.prototype.createDownloadUrl = function() {
 
 	if (!$('#pause').data('paused')) {
 
-		return '/recent?format=csv&' + variables + 'dgm=' + dgms + '&elapsed=' + this.elapsed;
+		return '/recent?format=csv&' + variables + dgms + 'elapsed=' + this.elapsed;
 	} else if (this.series.length > 0) {
-		
+
+		// pick the earliest time from all series as the end time
 		var start;
 		this.series.forEach(function(s) {
 			var x = s.data[0].x * 1000;
@@ -543,7 +553,8 @@ dashChart.prototype.createDownloadUrl = function() {
 				start = x;
 			}
 		});
-		
+	
+		// pick the latest time from all series as the end time	
 		var end;
 		this.series.forEach(function(s) {
 			var x = s.data[s.data.length-1].x * 1000;
