@@ -37,7 +37,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 			time = moment.tz(doc.time, 'America/New_York');
 		} else if (doc._id) { // aggregate cursor overloads _id
 			doc._id.month -= 1;
-			time = moment.tz(doc._id, 'UTC');
+			time = moment.tz(doc._id, 'UTC').tz('America/New_York');
 		} else {
 			return;
 		}
