@@ -418,6 +418,19 @@ var cursor = collection.find({ time: { $gt: twoHoursAgo }})
 
 where `$gt` represents the "greater than" operator. The retrieved documents are then massaged to meet the requirements of the desired output format.
 
+##### Data Aggregation
+
+When using the `rickshaw` output format, the data is aggregated to reduce the number of points.
+
+| Duration      | Aggregate |
+| ------------- | --------- |
+| &le; 6 hours  | None      |
+| &le; 1 week   | Minute    |
+| &le; 1 month  | Hourly    |
+| &gt; 1 month  | Daily     |
+
+The aggregation performed is a simple average of the available data points. Note that "daily" aggregation is performed in the [Eastern Time Zone](http://en.wikipedia.org/wiki/Eastern_Time_Zone), which is either EST or EDT depending on whether or not daylight savings time is being observed.
+
 #### Data Formats
 
 ##### Comma-Separated Values (CSV)
