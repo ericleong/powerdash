@@ -24,20 +24,24 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 	
 	var reset;
 
-	if (duration > 1000*60*60*6) {  // 6 hours
-
-		reset = ['millisecond', 'second']; // group by minute
-
-		if (duration > 1000*60*60*24*7) { // 1 week
-			reset.push('minute'); // group by hour
-		}
-
-		if (duration > 1000*60*60*24*7*4) { // 1 month
-			reset.push('hour'); // group by day
-		}
+	// this is separate from the mongodb aggregation code because of daylight savings
+	if (duration > 1000*60*60*24*7*4) { // 1 month
+		reset = ['millisecond', 'second', 'minute', 'hour']; // group by day
 	}
 
 	cursor.forEach(function(doc) {
+		
+		var time;
+		
+		if (doc.time) {
+			time = moment.tz(doc.time, 'America/New_York');
+		} else if (doc._id) { // aggregate cursor overloads _id
+			doc._id.month -= 1;
+			time = moment.tz(doc._id, 'UTC');
+		} else {
+			return;
+		}
+		
 		if (reset === undefined) {
 			for (var col in doc) {
 				if (col == 'time' || col == '_id')
@@ -45,19 +49,18 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 				
 				if (map[col]) {
 					map[col].push({
-						x : parseInt(moment(doc.time).format('X'), 10),
+						x : parseInt(time.format('X'), 10),
 						y : doc[col]
 					});
 				} else {
 					map[col] = [ {
-						x : parseInt(moment(doc.time).format('X'), 10),
+						x : parseInt(time.format('X'), 10),
 						y : doc[col]
 					} ];
 				}
 			}
 		} else {
 
-			var time = moment.tz(doc.time, 'America/New_York');
 			for (var r in reset) {
 				time.set(reset[r], 0);
 			}
@@ -340,13 +343,69 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 			});
 		}, function(latest, projection, units, callback) {
 			// query for events newer than latest - elapsed
+			var start = new Date(latest - elapsed);
+			
 			var cursor;
 			
-			if (projection)
-				cursor = collection.find({ time: { $gt: new Date(latest - elapsed) }}, projection);
-			else
+			if (projection) {
+				if (processor == toRickshaw && elapsed > 1000*60*60*6) { // 6 hours
+
+					// group by hour
+					var group = {
+						_id: {
+							year : { $year : "$time" },
+							month : { $month : "$time" },
+							day : { $dayOfMonth : "$time" },
+							hour : { $hour : "$time" },
+						}
+					};
+
+					// sort by hour
+					var sort = { 
+						"_id.year": 1,
+						"_id.month": 1,
+						"_id.day": 1,
+						"_id.hour": 1
+					};
+					
+					if (elapsed <= 1000*60*60*24*7) { // 1 week
+						group._id.minute = { $minute : "$time" }; // group by minute
+						sort["_id.minute"] = 1;
+					}
+					
+					Object.keys(projection).forEach(function(field) {
+						if (field != 'time') {
+							group[field] = { $avg: "$" + field };
+						}
+					});
+				
+					cursor = collection.aggregate(
+						[
+							{
+								$match: {
+									time: {
+										$gte: start
+									}
+								}
+							},
+							{
+								$group: group
+							},
+							{
+								$sort: sort
+							}
+						],
+						{
+							cursor: {}
+						}
+						);
+				} else {
+					cursor = collection.find({ time: { $gt: start }}, projection);
+				} 
+			} else {
 				cursor = collection.find({ time: { $gt: new Date(latest - elapsed) }});
-			
+			}
+
 			cursor.sort({time: 1});
 			
 			callback(null, db, cursor, elapsed, units);
@@ -383,9 +442,9 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 				var cursor;
 
 				if (projection)
-					cursor = collection.find({ time: { $lt: end, $gt: start }}, projection);
+					cursor = collection.find({ time: { $lte: end, $gt: start }}, projection);
 				else
-					cursor = collection.find({ time: { $lt: end, $gt: start }});
+					cursor = collection.find({ time: { $lte: end, $gt: start }});
 				
 				cursor.sort({time: 1});
 				
