@@ -215,18 +215,6 @@ var toArray = function(db, cursor, duration, units, callback) {
 	});
 };
 
-var buildProjection = function(desired) {
-	var projection;
-	if (desired && desired.length > 0) {
-		projection = {time: true};
-		for (var d in desired) {
-			projection[desired[d]] = true;
-		}
-	}
-	
-	return projection;
-};
-
 var getLatest = function(dgm, callback) {
 	// Gets the last set of data from the database
 	
@@ -269,16 +257,16 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 		});
 	} else {
 		// Pick variables to retrieve
-		var projection = buildProjection(desired);
-
-		if (projection) {
+		if (desired && desired.length > 0) {
 			// get units
 			db.collection('meta_' + cleanDGM(dgm)).find({name: { $in: desired }}, {name: true, unit: true}).toArray(function(err, variables) {
-				if (!err && variables) {
+				if (!err && variables && variables.length > 0) {
+					var projection = {time: true};
 					var unit = {};
 
 					for (var i in variables) {
 						if (variables[i].name) {
+							projection[variables[i].name] = true;
 							unit[variables[i].name] = variables[i].unit;
 						}
 					}
