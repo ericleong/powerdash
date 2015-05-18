@@ -350,49 +350,22 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 			if (projection) {
 				if (processor == toRickshaw && elapsed > 1000*60*60*6) { // 6 hours
 
-					// group by hour
-					var group = {
-						_id: {
-							year : { $year : "$time" },
-							month : { $month : "$time" },
-							day : { $dayOfMonth : "$time" },
-							hour : { $hour : "$time" },
-						}
-					};
-
-					// sort by hour
-					var sort = { 
-						"_id.year": 1,
-						"_id.month": 1,
-						"_id.day": 1,
-						"_id.hour": 1
-					};
-					
-					if (elapsed <= 1000*60*60*24*7) { // 1 week
-						group._id.minute = { $minute : "$time" }; // group by minute
-						sort["_id.minute"] = 1;
-					}
-					
-					Object.keys(projection).forEach(function(field) {
-						if (field != 'time') {
-							group[field] = { $avg: "$" + field };
-						}
-					});
+					var params = getAggregateParams(projection, elapsed);
 				
 					cursor = collection.aggregate(
 						[
 							{
 								$match: {
 									time: {
-										$gte: start
+										$gt: start
 									}
 								}
 							},
 							{
-								$group: group
+								$group: params.group
 							},
 							{
-								$sort: sort
+								$sort: params.sort
 							}
 						],
 						{
@@ -401,17 +374,53 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 						);
 				} else {
 					cursor = collection.find({ time: { $gt: start }}, projection);
-				} 
+					cursor.sort({time: 1});
+				}
 			} else {
 				cursor = collection.find({ time: { $gt: new Date(latest - elapsed) }});
+				cursor.sort({time: 1});
 			}
-
-			cursor.sort({time: 1});
 			
 			callback(null, db, cursor, elapsed, units);
 		}, processor
 		], cb);
 	});
+};
+
+var getAggregateParams = function(projection, elapsed) {
+	// group by hour
+	var group = {
+		_id: {
+			year : { $year : "$time" },
+			month : { $month : "$time" },
+			day : { $dayOfMonth : "$time" },
+			hour : { $hour : "$time" },
+		}
+	};
+
+	// sort by hour
+	var sort = { 
+		"_id.year": 1,
+		"_id.month": 1,
+		"_id.day": 1,
+		"_id.hour": 1
+	};
+	
+	if (elapsed <= 1000*60*60*24*7) { // 1 week
+		group._id.minute = { $minute : "$time" }; // group by minute
+		sort["_id.minute"] = 1;
+	}
+	
+	Object.keys(projection).forEach(function(field) {
+		if (field != 'time') {
+			group[field] = { $avg: "$" + field };
+		}
+	});
+	
+	return {
+		sort: sort,
+		group: group
+	};
 };
 
 var getRange = function(dgm, start, end, desired, processor, cb) {
@@ -439,16 +448,46 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 			},
 			function(projection, units, callback) {
 				// query for events between start and end
+				var duration = end - start;
+
 				var cursor;
 
-				if (projection)
-					cursor = collection.find({ time: { $lte: end, $gt: start }}, projection);
-				else
+				if (projection) {
+					if (processor == toRickshaw && duration > 1000*60*60*6) { // 6 hours
+	
+						var params = getAggregateParams(projection, duration);
+					
+						cursor = collection.aggregate(
+							[
+								{
+									$match: {
+										time: {
+											$gt: start,
+											$lte: end
+										}
+									}
+								},
+								{
+									$group: params.group
+								},
+								{
+									$sort: params.sort
+								}
+							],
+							{
+								cursor: {}
+							}
+							);
+					} else {
+						cursor = collection.find({ time: { $lte: end, $gt: start }}, projection);
+						cursor.sort({time: 1});
+					}
+				} else {
 					cursor = collection.find({ time: { $lte: end, $gt: start }});
+					cursor.sort({time: 1});
+				}
 				
-				cursor.sort({time: 1});
-				
-				callback(null, db, cursor, end - start, units);
+				callback(null, db, cursor, duration, units);
 			}, processor
 		], cb);
 	});

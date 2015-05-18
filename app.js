@@ -361,18 +361,26 @@ app.get('/recent/diff', function(req, res) {
 io.sockets.on('connection', function(socket) {
 
 	socket.on('load', function(query) {
-		query.dgm = query.dgm ? query.dgm : 'x-pml:/diagrams/ud/41cooper.dgm';  
-		api.getRecent(query.dgm, query.elapsed, 
-			query.variables, api.toRickshaw, function(err, list) {
-				if (list && list.length > 0) {
-					socket.emit('dataset', list);
-				} else {
-					console.warn('could not load data for ' + query.dgm + ' @ ' + query.elapsed + ' & ' + query.variables);
-					if (err) {
-						console.warn(err);
-					}
+		query.dgm = query.dgm ? query.dgm : 'x-pml:/diagrams/ud/41cooper.dgm';
+		
+		var respond = function(err, list) {
+			if (list && list.length > 0) {
+				socket.emit('dataset', list);
+			} else {
+				console.warn('could not load data for ' + query.dgm + ' @ ' + query.elapsed + ' & ' + query.variables);
+				if (err) {
+					console.warn(err);
 				}
-			});
+			}
+		}
+		  
+		if (query.elapsed) {
+			api.getRecent(query.dgm, query.elapsed, 
+				query.variables, api.toRickshaw, respond);
+		} else if (query.start && query.end) {
+			api.getRange(query.dgm, new Date(parseInt(query.start, 10)), new Date(parseInt(query.end, 10)), 
+				query.variables, api.toRickshaw, respond);
+		}
 	});
 
 	socket.on('update', function(dgm) {

@@ -98,8 +98,12 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 					}
 	
 					chart.createLegend();
-					chart.checkEnabled();
+					chart.disableSeries(disable);
 				}
+			}
+			
+			if (chart.renderer == 'bar') {
+				Rickshaw.Series.fill(chart.series, 0);
 			}
 	
 			// disable out of range series
@@ -158,29 +162,35 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 		if ($(this).val() == 'two-hours') {
 			$('#pause').prop('disabled', false);
 			chart.setElapsed(2*60*60*1000);
+			chart.setRenderer('line');
 			chart.loadPoints();
 		} else if ($(this).val() == 'six-hours') {
 			$('#pause').prop('disabled', false);
 			chart.setElapsed(6*60*60*1000);
+			chart.setRenderer('line');
 			chart.loadPoints();
 		} else if ($(this).val() == 'twentyfour-hours') {
 			chart.setElapsed(24*60*60*1000);
 			chart.setPaused(true);
+			chart.setRenderer('line');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
 		} else if ($(this).val() == 'two-weeks') {
 			chart.setElapsed(2*7*24*60*60*1000);
 			chart.setPaused(true);
+			chart.setRenderer('bar');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
 		} else if ($(this).val() == 'two-months') {
 			chart.setElapsed(2*4*7*24*60*60*1000); // 2x28 days
 			chart.setPaused(true);
+			chart.setRenderer('bar');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
 		} else if ($(this).val() == 'one-year') {
 			chart.setElapsed(365*24*60*60*1000); // 365 days
 			chart.setPaused(true);
+			chart.setRenderer('bar');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
 		}
@@ -233,6 +243,14 @@ dashChart.prototype.prepareSeries = function(s) {
 
 dashChart.prototype.loadPoints = function() {
 	$('#chart').addClass('loading');
+	
+	if (this.series) {
+		this.series.forEach(function(s) {
+			if (s.data) {
+				s.data = [s.data[s.data.length - 1]];
+			}
+		});
+	}
 
 	for (var p in this.points) {
 		this.loadSeries(this.points[p].dgm, this.points[p].variables);
@@ -240,27 +258,54 @@ dashChart.prototype.loadPoints = function() {
 };
 
 dashChart.prototype.loadSeries = function(dgm, variables) {
-	this.socket.emit('load', {
-		dgm: dgm,
-		variables: variables,
-		elapsed: this.elapsed
-	});
-	if (!$('#pause').data('paused')) {
+	if ($('#pause').data('paused')) {
+		var now = +(new Date());
+
+		this.socket.emit('load', {
+			dgm: dgm,
+			variables: variables,
+			start: now - this.elapsed,
+			end: now
+		});
+	} else {
+		this.socket.emit('load', {
+			dgm: dgm,
+			variables: variables,
+			elapsed: this.elapsed
+		});
+		
 		this.socket.emit('update', dgm);
 	}
+};
+
+dashChart.prototype.setRenderer = function(renderer) {
+	if (renderer == 'bar') {
+		// Disable a series if it represents the sum of other series
+		this.disableSeries('Total KW');
+		
+		Rickshaw.Series.fill(this.series, 0);
+	}
+	
+	this.renderer = renderer;
+	
+	this.graph.configure({
+		renderer: renderer
+	});
+	
+	this.graph.render();
 };
 
 dashChart.prototype.createLegend = function() {
 	$('#legend').empty();
 
-	var legend = new Rickshaw.Graph.Legend({
+	this.legend = new Rickshaw.Graph.Legend({
 		element : document.getElementById('legend'),
 		graph : this.graph
 	});
 
 	new Rickshaw.Graph.Behavior.Series.Toggle({
 		graph : this.graph,
-		legend : legend
+		legend : this.legend
 	});
 };
 
@@ -305,6 +350,7 @@ dashChart.prototype.createGraph = function(dataset) {
 		series : this.series
 	});
 	this.graph = graph;
+	this.renderer = 'line';
 	
 	$(window).resize(function() {
 		if (graph) {
@@ -423,17 +469,27 @@ dashChart.prototype.createGraph = function(dataset) {
 	y_axis.render();
 
 	this.createLegend();
-	this.checkEnabled();
+	this.disableSeries(this.disable);
 };
 
-dashChart.prototype.checkEnabled = function() {
-	if (this.disable && this.disable.length > 0) {
+dashChart.prototype.disableSeries = function(disable) {
+	if (disable) {
 		for (var i in this.series) {
-			if (this.disable.indexOf(this.series[i].id) > -1) {
+			if (disable.length > 0 && disable.indexOf(this.series[i].id) > -1) {
 				this.series[i].disable();
-			} else if (this.disable == this.series[i].id) {
+			} else if (disable == this.series[i].id) {
 				this.series[i].disable();
 			}
+		}
+		
+		if (this.legend && this.legend.lines && this.legend.lines.length > 0) {
+			this.legend.lines.forEach(function(line) {
+				if (line.series.disabled) {
+					$(line.element).addClass('disabled');
+				} else {
+					$(line.element).removeClass('disabled');
+				}
+			});
 		}
 	}
 };
