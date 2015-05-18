@@ -427,7 +427,8 @@ When using the `rickshaw` output format, the data is aggregated to reduce the nu
 | &le; 6 hours  | None      |
 | &le; 1 week   | Minute    |
 | &le; 1 month  | Hourly    |
-| &gt; 1 month  | Daily     |
+| &le; 6 months | Daily     |
+| &gt; 6 months | Weekly    |
 
 The aggregation performed is a simple average of the available data points. Note that "daily" aggregation is performed in the [Eastern Time Zone](http://en.wikipedia.org/wiki/Eastern_Time_Zone), which is either EST or EDT depending on whether or not daylight savings time is being observed.
 

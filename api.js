@@ -27,6 +27,10 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 	// this is separate from the mongodb aggregation code because of daylight savings
 	if (duration > 1000*60*60*24*7*4) { // 1 month
 		reset = ['millisecond', 'second', 'minute', 'hour']; // group by day
+		
+		if (duration > 1000*60*60*24*7*4*6) { // 6 months
+			reset.push('day');
+		}
 	}
 
 	cursor.forEach(function(doc) {
@@ -391,29 +395,26 @@ var getAggregateParams = function(projection, elapsed) {
 	// group by hour
 	var group = {
 		_id: {
-			year : { $year : "$time" },
-			month : { $month : "$time" },
-			day : { $dayOfMonth : "$time" },
-			hour : { $hour : "$time" },
+			year : { $year : '$time' },
+			month : { $month : '$time' },
+			day : { $dayOfMonth : '$time' },
+			hour : { $hour : '$time' },
 		}
 	};
 
-	// sort by hour
-	var sort = { 
-		"_id.year": 1,
-		"_id.month": 1,
-		"_id.day": 1,
-		"_id.hour": 1
-	};
-	
 	if (elapsed <= 1000*60*60*24*7) { // 1 week
-		group._id.minute = { $minute : "$time" }; // group by minute
-		sort["_id.minute"] = 1;
+		group._id.minute = { $minute : '$time' }; // group by minute
 	}
+	
+	var sort = {};
+	
+	Object.keys(group._id).forEach(function(key) {
+		sort['_id.' + key] = 1;
+	});
 	
 	Object.keys(projection).forEach(function(field) {
 		if (field != 'time') {
-			group[field] = { $avg: "$" + field };
+			group[field] = { $avg: '$' + field };
 		}
 	});
 	
