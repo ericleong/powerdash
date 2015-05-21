@@ -634,6 +634,6 @@ dashChart.prototype.createDownloadUrl = function() {
 			}
 		});
 
-		return '/range?format=csv&' + variables + 'dgm=' + dgms + '&start=' + start + '&end=' + end;
+		return '/range?format=csv&' + variables + dgms + 'start=' + start + '&end=' + end;
 	}
 };

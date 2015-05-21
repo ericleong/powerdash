@@ -280,9 +280,13 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 
 				callback(null, null, unit);
 			} else {
-				console.warn('error getting all fields from ' + dgm);
-				console.warn(err.stack);
-				callback(err);
+				if (err) {
+					console.warn(err);
+					callback(err);
+				} else {
+					console.warn('error getting all fields from ' + dgm);
+					callback('error getting all fields from ' + dgm);
+				}
 			}
 		});
 	} else {
@@ -303,9 +307,13 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 
 					callback(null, projection, unit);
 				} else {
-					console.warn('error getting units from ' + dgm);
-					console.warn(err.stack);
-					callback(err);
+					if (err) {
+						console.warn(err);
+						callback(err);
+					} else {
+						console.warn('error getting units from ' + dgm);
+						callback('error getting units from ' + dgm);
+					}
 				}
 			});
 		} else {
@@ -324,9 +332,13 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 
 					callback(null, projection, unit);
 				} else {
-					console.warn('error getting variables from ' + dgm);
-					console.warn(err.stack);
-					callback(err);
+					if (err) {
+						console.warn(err);
+						callback(err);
+					} else {
+						console.warn('error getting variables from ' + dgm);
+						callback('error getting variables from ' + dgm);
+					}
 				}
 			});
 		}
@@ -361,7 +373,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 					callback(null, item.time, projection, units);
 				} else {
 					if (err) {
-						console.warn(err.stack);
+						console.warn(err);
 						callback(err);
 					} else {
 						callback('error getting newest datapoint from ' + dgm);
