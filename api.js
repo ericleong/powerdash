@@ -15,13 +15,13 @@ var humanize = require('./humanize.json');
 
 // Saves a block (chunk) of data
 // Used by rickshaw aggregation
-var saveBlock = function(map, row, lastTime, num) {
+var saveBlock = function(map, row, lastTime, num, dt) {
 	for (var col in row) {
 		if (map[col]) {
 			if (row[col] >= 0 && num >= 0) {
 				map[col].push({
 					x: parseInt(lastTime.format('X'), 10),
-					y: row[col] / num
+					y: row[col] / num * dt
 				});
 			} else {
 				console.warn(lastTime + ': ' + row[col] + ' ' + num);
@@ -29,7 +29,7 @@ var saveBlock = function(map, row, lastTime, num) {
 		} else {
 			map[col] = [ {
 				x: parseInt(lastTime.format('X'), 10),
-				y: row[col] / num
+				y: row[col] / num * dt
 			} ];
 		}
 	}
@@ -45,14 +45,28 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 	var num = 0;
 	
 	var reset;
+	var dt = 1; // for bar graphs, integrate.
 
-	// this is separate from the mongodb aggregation code because of daylight savings
-	if (duration > 1000*60*60*24*7*4) { // 1 month
-		reset = ['millisecond', 'second', 'minute', 'hour']; // group by day
-		
-		if (duration > 1000*60*60*24*7*4*6) { // 6 months
-			reset.push('day');
+	if (duration > 1000*60*60*24*7) { // one week
+		// grouped by hour
+	
+		// power -> energy
+		for (var u in units) {
+			if (units[u] == 'kW') {
+				units[u] = 'kWh';
+			}
 		}
+		
+		// this is separate from the mongodb aggregation code because of daylight savings
+		if (duration > 1000*60*60*24*7*4) { // 1 month
+			reset = ['millisecond', 'second', 'minute', 'hour']; // group by day
+			dt *= 24;
+			
+			if (duration > 1000*60*60*24*7*4*6) { // 6 months
+				reset.push('day'); // group by week
+				dt *= 7;
+			}
+		}	
 	}
 
 	cursor.forEach(function(doc) {
@@ -76,12 +90,12 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 				if (map[col]) {
 					map[col].push({
 						x : parseInt(time.format('X'), 10),
-						y : doc[col]
+						y : doc[col] * dt
 					});
 				} else {
 					map[col] = [ {
 						x : parseInt(time.format('X'), 10),
-						y : doc[col]
+						y : doc[col] * dt
 					} ];
 				}
 			}
@@ -94,7 +108,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 			if (lastTime) {
 				// new block
 				if (!time.isSame(lastTime)) {
-					saveBlock(map, row, lastTime, num);
+					saveBlock(map, row, lastTime, num, dt);
 					
 					for (var col in row) {
 						row[col] = doc[col];
@@ -133,7 +147,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 		} else {
 			
 			// Save last block
-			saveBlock(map, row, lastTime, num);
+			saveBlock(map, row, lastTime, num, dt);
 			
 			// convert map into list
 			var list = [];

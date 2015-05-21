@@ -83,6 +83,9 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 				for (var j in chart.series) {
 					if (chart.series[j].name == dataset[i].name) {
 						chart.series[j].data = dataset[i].data;
+						if (dataset[i].unit) {
+							chart.series[j].unit = dataset[i].unit;
+						}
 						added = true;
 					}
 				}
@@ -467,7 +470,11 @@ dashChart.prototype.createGraph = function(dataset) {
 		orientation : 'left',
 		tickFormat : function(y) {
 			if (chart.unit) {
-				return Rickshaw.Fixtures.Number.formatKMBT(y) + ' ' + chart.unit;
+				if (chart.unit == 'kW' && chart.renderer == 'bar') {
+					return Rickshaw.Fixtures.Number.formatKMBT(y) + ' kWh';
+				} else {
+					return Rickshaw.Fixtures.Number.formatKMBT(y) + ' ' + chart.unit;
+				}
 			} else {
 				return Rickshaw.Fixtures.Number.formatKMBT(y);
 			}

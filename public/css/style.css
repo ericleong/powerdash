@@ -223,7 +223,7 @@ a.title:hover {
 }
 #y-axis {
 	float: left;
-	width: 60px;
+	width: 70px;
 }
 #y-axis > svg {
 	overflow: visible;
