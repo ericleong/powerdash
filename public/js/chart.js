@@ -365,7 +365,15 @@ dashChart.prototype.createGraph = function(dataset) {
 		graph: this.graph,
 		xFormatter: function(x) {
 			var d = moment(x * 1000);
-			return d.format('MMM DD hh:mm:ss a');
+			if (chart.elapsed < 2*7*24*60*60*1000) {
+				return d.format('MMM DD hh:mm:ss a');
+			} else if (chart.elapsed < 2*4*7*24*60*60*1000) {
+				return d.format('MMM DD hh:mm a');
+			} else if (chart.elapsed < 365*24*60*60*1000) {
+				return d.format('MMM DD');
+			} else {
+				return d.format('MMM DD') + ' - ' + d.add(1, 'weeks').format('MMM DD');
+			}
 		},
 		yFormatter: function(y) {
 			if (y % 1 === 0) {

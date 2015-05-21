@@ -13,6 +13,28 @@ var mongourl = mongo.getMongoUrl();
 
 var humanize = require('./humanize.json');
 
+// Saves a block (chunk) of data
+// Used by rickshaw aggregation
+var saveBlock = function(map, row, lastTime, num) {
+	for (var col in row) {
+		if (map[col]) {
+			if (row[col] >= 0 && num >= 0) {
+				map[col].push({
+					x: parseInt(lastTime.format('X'), 10),
+					y: row[col] / num
+				});
+			} else {
+				console.warn(lastTime + ': ' + row[col] + ' ' + num);
+			}
+		} else {
+			map[col] = [ {
+				x: parseInt(lastTime.format('X'), 10),
+				y: row[col] / num
+			} ];
+		}
+	}
+};
+
 var toRickshaw = function(db, cursor, duration, units, cb) {
 
 	// build a map of columns to data
@@ -72,24 +94,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 			if (lastTime) {
 				// new block
 				if (!time.isSame(lastTime)) {
-					// save previous block
-					for (var col in row) {
-						if (map[col]) {
-							if (row[col] >= 0 && num >= 0) {
-								map[col].push({
-									x: parseInt(lastTime.format('X'), 10),
-									y: row[col] / num
-								});
-							} else {
-								console.warn(lastTime + ': ' + row[col] + ' ' + num);
-							}
-						} else {
-							map[col] = [ {
-								x: parseInt(lastTime.format('X'), 10),
-								y: row[col] / num
-							} ];
-						}
-					}
+					saveBlock(map, row, lastTime, num);
 					
 					for (var col in row) {
 						row[col] = doc[col];
@@ -126,6 +131,10 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 		if (err) {
 			cb(err);
 		} else {
+			
+			// Save last block
+			saveBlock(map, row, lastTime, num);
+			
 			// convert map into list
 			var list = [];
 			
