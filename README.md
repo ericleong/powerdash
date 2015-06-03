@@ -451,7 +451,6 @@ Rickshaw is the library used to graph the data. It expects each series as a sepa
 ```JSON
 {
   "name": "Utility Service 1",
-  "raw": "SRV1KW",
   "id": "SRV1KW",
   "unit": "kW",
   "data": [
@@ -463,7 +462,7 @@ Rickshaw is the library used to graph the data. It expects each series as a sepa
 }
 ```
 
-`name` is converted from `raw` using the mapping specified in `humanize.json`. This is the human-readable name. Inside `data`, `x` is the [unix timestamp](http://en.wikipedia.org/wiki/Unix_time), and `y` is the value at that time.
+`name` is converted from `id` using the mapping specified in `humanize.json`. This is the human-readable name. Inside `data`, `x` is the [unix timestamp](http://en.wikipedia.org/wiki/Unix_time), and `y` is the value at that time.
 
 Libraries
 ---------
