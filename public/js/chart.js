@@ -490,10 +490,14 @@ dashChart.prototype.createGraph = function(dataset) {
 dashChart.prototype.disableSeries = function(disable) {
 	if (disable) {
 		for (var i in this.series) {
-			if (disable.length > 0 && disable.indexOf(this.series[i].id) > -1) {
-				this.series[i].disable();
-			} else if (disable == this.series[i].id) {
-				this.series[i].disable();
+			try {
+				if (disable.length > 0 && disable.indexOf(this.series[i].id) > -1) {
+					this.series[i].disable();
+				} else if (disable == this.series[i].id) {
+					this.series[i].disable();
+				}
+			} catch (e) {
+				console.error('Could not disable ' + disable);
 			}
 		}
 		
