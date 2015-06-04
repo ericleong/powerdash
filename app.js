@@ -154,7 +154,7 @@ app.get('/watersaved', function(req, res) {
 				variables: variables,
 				elapsed: elapsed,
 				setname: 'Water Saved',
-				amount: results.amount[variable],
+				amount: Math.round(results.amount[variable]),
 				latest: results.latest[variable]
 			});
 		}

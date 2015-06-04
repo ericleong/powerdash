@@ -4,13 +4,11 @@ html(lang='en')
 		include includes/head
 		link(rel='stylesheet', href='./css/save.css')
 		script(src='/socket.io/socket.io.js')
-		script.
-			var dgm = '#{dgm}';
-			var variables = '#{variables}';
-			var latest = #{latest};
-			var amount = #{amount};
-	body
-		div.container
-			h1#amount #{amount}
 		script(src='/js/settings.js')
 		script(src='/js/save.js')
+	body
+		div.container
+			h1#amount !{amount}
+		
+		script.
+				var dashmeter = new dashMeter(host, '!{dgm}', '!{variables}', !{latest}, !{amount});
