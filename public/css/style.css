@@ -169,17 +169,21 @@ a.title:hover {
 	margin-top: 12pt;
 }
 #data .rickshaw_legend {
-	padding-top: 5px;
-	padding-bottom: 5px;
+	padding: 0.2em 0 0.2em 0;
 
 	font-family: 'Slabo 13px', serif;
-	font-size: 11pt;
+	font-size: 14pt;
 	font-weight: 400;
 }
+#data .rickshaw_legend ul {
+	margin: 0;
+}
 #data .rickshaw_legend .line {
-	padding-right: 2px;
-	line-height: 1.6;
-	font-size: 13pt;
+	padding-left: 0;
+	padding-right: 10px;
+
+	line-height: 1;
+	font-size: 14pt;
 }
 #data .rickshaw_legend .line .swatch {
 	border-radius: 0px;
@@ -191,8 +195,9 @@ a.title:hover {
 }
 #data .rickshaw_legend .action {
 	opacity: 0.9;
-	margin-right: 0.4em;
-	font-size: inherit;
+	padding: 0.3em 0.3em 0.3em 0.6em;
+	font-size: 16pt;
+	display: inline-block;
 }
 #data .rickshaw_legend .action:hover {
 	opacity: 1.0;
