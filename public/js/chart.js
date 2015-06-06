@@ -181,7 +181,7 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 		} else if ($(this).val() == 'two-weeks') {
 			chart.setElapsed(2*7*24*60*60*1000);
 			chart.setPaused(true);
-			chart.setRenderer('bar');
+			chart.setRenderer('line');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
 		} else if ($(this).val() == 'two-months') {
