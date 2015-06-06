@@ -80,10 +80,11 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 			for (var i in dataset) {
 				var added = false;
 	
+				// Check to see if we have added this series
 				for (var j in chart.series) {
 					if (chart.series[j].name == dataset[i].name) {
 						chart.series[j].data = dataset[i].data;
-						if (dataset[i].unit) {
+						if (dataset[i].unit) { // update the unit
 							chart.series[j].unit = dataset[i].unit;
 						}
 						added = true;
@@ -91,7 +92,7 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 				}
 	
 				if (!added) {
-					chart.series.push(chart.prepareSeries(dataset[i]));
+					chart.series.push(chart.prepareSeries(dataset[i], true));
 	
 					chart.series.sort(seriesSort);
 	
@@ -111,7 +112,8 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 	
 			// disable out of range series
 			var latest = -1;
-	
+
+			// find the latest timestamp
 			for (var i in chart.series) {
 				if (chart.series[i].data && chart.series[i].data.length > 0) {
 					var time = chart.series[i].data[chart.series[i].data.length - 1].x;
@@ -132,6 +134,11 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 						// disable series if we have old data
 						if (earliest > lastTime * 1000) {
 							chart.series[i].disable();
+						}
+						
+						// disable last update if older than 5 minutes
+						if (latest - 5*60 >= lastTime) {
+							chart.series[i].value.text('N/A');
 						}
 					}
 				}
@@ -225,7 +232,7 @@ dashChart.prototype.emitStream = function(command) {
 	}
 };
 
-dashChart.prototype.prepareSeries = function(s) {
+dashChart.prototype.prepareSeries = function(s, valid) {
 	// assumes series has a name
 
 	s.color = this.palette.color();
@@ -233,12 +240,16 @@ dashChart.prototype.prepareSeries = function(s) {
 	$('<div/>').addClass('name').text(s.name).appendTo(s.display);
 	s.value = $('<div/>').addClass('value').appendTo(s.display);
 
-	if (s.unit) {
-		s.value.text(s.data[s.data.length - 1].y + ' ' + s.unit);
-	} else if (this.unit) {
-		s.value.text(s.data[s.data.length - 1].y + ' ' + this.unit);
+	if (valid) {
+		if (s.unit) {
+			s.value.text(s.data[s.data.length - 1].y + ' ' + s.unit);
+		} else if (this.unit) {
+			s.value.text(s.data[s.data.length - 1].y + ' ' + this.unit);
+		} else {
+			s.value.text(s.data[s.data.length - 1].y);
+		}
 	} else {
-		s.value.text(s.data[s.data.length - 1].y);
+		s.value.text('N/A');
 	}
 
 	return s;
@@ -322,22 +333,30 @@ dashChart.prototype.createGraph = function(dataset) {
 		return b.name.localeCompare(a.name);
 	});
 
-	var date;
+	// Determine the time of the latest update
+	var latest;
+	var latestTimestamp;
+	
+	this.series.forEach(function(s) {
+		var timestamp = s.data[s.data.length - 1].x;
+		var d = new Date(timestamp * 1000);
 
-	for (var i in this.series) {
-		this.prepareSeries(this.series[i]);
-
-		var d = new Date(this.series[i].data[this.series[i].data.length - 1].x * 1000);
-		if (date === undefined || d > date) {
-			date = d;
+		if (latest === undefined || d > latest) {
+			latest = d;
+			latestTimestamp = timestamp; 
 		}
+	});
 
-		$('#current-data').prepend(this.series[i].display);
-	}
+	this.series.forEach(function(s) {
+		// Mark series with data older than 5 minutes as invalid
+		chart.prepareSeries(s, latestTimestamp - 5*60 < s.data[s.data.length - 1].x);
 
-	if (date) {
-		$('#last-date').text(moment(date).format('l'));
-		$('#last-time').text(moment(date).format('hh:mm:ss a'));
+		$('#current-data').prepend(s.display);
+	});
+
+	if (latest) {
+		$('#last-date').text(moment(latest).format('l'));
+		$('#last-time').text(moment(latest).format('hh:mm:ss a'));
 	}
 	
 	var size = this.graphSize();
