@@ -321,6 +321,12 @@ dashChart.prototype.createLegend = function() {
 		graph : this.graph,
 		legend : this.legend
 	});
+
+	this.legend.lines.forEach(function(line) {
+		// clicking on text should be the same as clicking on checkmark
+		var check = line.element.getElementsByTagName('a')[0];
+		line.element.getElementsByTagName('span')[0].onclick = check.onclick;
+	});
 };
 
 /* GRAPH */
