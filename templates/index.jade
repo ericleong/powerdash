@@ -64,7 +64,7 @@ html(lang='en')
 							input#download(type='button', value='download')
 				if message
 					p.message #{message}
-		footer Created by #[a(href='//ericleong.me') Eric Leong] under the advisement of Prof. Melody Baglione with partial support from the National Science Foundation under #[a(href='//www.nsf.gov/awardsearch/showAward?AWD_ID=1044830') grant no. DUE 104483]
+		footer Created by #[a(href='//ericleong.me') Eric Leong] under the advisement of #[a(href='//engfac.cooper.edu/melody/10') Prof. Melody Baglione] with partial support from the National Science Foundation under #[a(href='//www.nsf.gov/awardsearch/showAward?AWD_ID=1044830') grant no. DUE 104483]
 		if disable
 			script.
 				var dashchart = new dashChart(host, !{points}, !{elapsed}, !{disable}, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
