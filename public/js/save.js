@@ -1,7 +1,9 @@
 'use strict';
 
-var dashMeter = function(host, dgm, variables, latest, amount) {
+var dashMeter = function(host, dgm, variables, latest) {
 	var socket = io.connect(host);
+	
+	var self = this;
 
 	socket.emit('update', dgm);
 	
@@ -11,16 +13,17 @@ var dashMeter = function(host, dgm, variables, latest, amount) {
 			if (dataset[d].name == variables) {
 				
 				var next = dataset[d].data[dataset[d].data.length - 1].y;
-	
+				
 				if (next && next > 0) {
-					var diff = next - latest;
-	
-					amount += diff;
-					document.getElementById('amount').innerHTML = amount.toFixed(0);
-	
-					latest = next;
+					self.update(next);
 				}
 			}
 		}
 	});
+	
+	this.update(latest);
+};
+
+dashMeter.prototype.update = function(value) {
+	document.getElementById('amount').innerHTML = Math.floor(value).toLocaleString();	
 };

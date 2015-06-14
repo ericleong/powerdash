@@ -25,7 +25,7 @@ html, body {
 
 h1#amount {
 	font-family: 'Slabo 13px', serif;
-	font-size: 36pt;
+	font-size: 42pt;
 	font-weight: 400;
 
 	padding: 0px;
@@ -33,18 +33,27 @@ h1#amount {
 
 	position: relative;
 	top: 50%;
-	transform: translateY(-60%);
 }
 
 @media (max-width: 200px) {
 	h1#amount {
-		font-size: 24pt;
+		font-size: 16pt;
 		transform: translateY(-70%);
+	}
+}
+@media (max-width: 600px) {
+	h1#amount {
+		font-size: 24pt;
 	}
 }
 @media (max-height: 200px) {
 	h1#amount {
-		font-size: 24pt;
+		font-size: 16pt;
 		transform: translateY(-70%);
+	}
+}
+@media (max-height: 600px) {
+	h1#amount {
+		font-size: 24pt;
 	}
 }

@@ -116,46 +116,19 @@ app.post('/upload', multipartMiddleware, function(req, res) {
 });
 
 app.get('/water', function(req, res) {
-	res.render('index', {
-		points: JSON.stringify([
-		{
-			dgm: 'x-pml:/diagrams/ud/41cooper/greywater.dgm',
-			variables: ['ART9 Result 1']
-		}
-		]),
-		min: 'auto',
-		elapsed: 2 * 60 * 60 * 1000,
-		setname: 'Rainwater Collection',
-		description: 'Water saved since Fall 2009.',
-		unit: 'gl',
-		message: 'This page is under construction.'
-	});
-});
-
-app.get('/watersaved', function(req, res) {
 	var dgm = 'x-pml:/diagrams/ud/41cooper/greywater.dgm';
 	var variable = 'ART9 Result 1';
 	var variables = [variable];
-	var elapsed = 24 * 60 * 60 * 1000;
 
-	async.parallel({
-		latest: function(callback) {
-			api.getLatest(dgm, callback);
-		},
-		amount: function(callback) {
-			api.getRecent(dgm, elapsed, variables, api.diff, callback);
-		}
-	}, function(err, results) {
+	api.getLatest(dgm, function(err, results) {
 		if (err) {
 			res.render(500, err);
 		} else {
 			res.render('save', {
 				dgm: dgm,
-				variables: variables,
-				elapsed: elapsed,
 				setname: 'Water Saved',
-				amount: Math.round(results.amount[variable]),
-				latest: results.latest[variable]
+				variables: variables,
+				latest: results[variable]
 			});
 		}
 	});
@@ -372,7 +345,7 @@ io.sockets.on('connection', function(socket) {
 					console.warn(err);
 				}
 			}
-		}
+		};
 		  
 		if (query.elapsed) {
 			api.getRecent(query.dgm, query.elapsed, 

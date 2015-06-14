@@ -8,7 +8,7 @@ html(lang='en')
 		script(src='/js/save.js')
 	body
 		div.container
-			h1#amount !{amount}
+			h1#amount 
 		
 		script.
-				var dashmeter = new dashMeter(host, '!{dgm}', '!{variables}', !{latest}, !{amount});
+				var dashmeter = new dashMeter(host, '!{dgm}', '!{variables}', !{latest});
