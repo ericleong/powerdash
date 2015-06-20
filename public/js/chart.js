@@ -321,6 +321,8 @@ dashChart.prototype.createLegend = function() {
 		graph : this.graph,
 		legend : this.legend
 	});
+	
+	$(this.legend.list).sortable('destroy');
 
 	this.legend.lines.forEach(function(line) {
 		// clicking on text should be the same as clicking on checkmark
