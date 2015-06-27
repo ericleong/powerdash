@@ -215,9 +215,9 @@ app.get('/recent', function(req, res) {
 		res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
 		
 		api.generateCSV(dgm.split(','), variables, 
-			function(dgm, variables, method, callback) {
-				api.getRecent(dgm, elapsed, variables, method, callback);
-			}, 
+			function(dgm, variables, method, callback, res) {
+				api.getRecent(dgm, elapsed, variables, method, callback, res);
+			},
 			res,
 			function(err, data) {
 				if (err) {
@@ -292,8 +292,8 @@ app.get('/range', function(req, res) {
 		res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
 
 		api.generateCSV(dgm.split(','), variables, 
-			function(dgm, variables, method, callback) {
-				api.getRange(dgm, range.start, range.end, variables, method, callback);
+			function(dgm, variables, method, callback, res) {
+				api.getRange(dgm, range.start, range.end, variables, method, callback, res);
 			}, 
 			res, function(err, data) {
 				if (err) {

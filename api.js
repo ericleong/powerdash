@@ -35,7 +35,7 @@ var saveBlock = function(map, row, lastTime, num, dt) {
 	}
 };
 
-var toRickshaw = function(db, cursor, duration, units, cb) {
+var toRickshaw = function(db, cursor, duration, units, res, cb) {
 
 	// build a map of columns to data
 	var map = {};
@@ -165,7 +165,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 	});
 };
 
-var toCSV = function(db, cursor, duration, units, callback, res) {
+var toCSV = function(db, cursor, duration, units, res, callback) {
 	// creates a csv file
 	
 	var csv = '';
@@ -246,7 +246,7 @@ var diff = function(db, cursor, duration, units, callback) {
 	});
 };
 
-var toArray = function(db, cursor, duration, units, callback) {
+var toArray = function(db, cursor, duration, units, res, callback) {
 	// creates a map
 
 	cursor.toArray(function(err, results) {
@@ -355,7 +355,7 @@ var getProjectionAndUnits = function(db, dgm, desired, callback) {
 	}
 };
 
-var getRecent = function(dgm, elapsed, desired, processor, cb) {
+var getRecent = function(dgm, elapsed, desired, processor, cb, res) {
 	// Gets a recent set of data from the database
 	
 	if (dgm == null || dgm.length == 0) {
@@ -430,7 +430,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb) {
 				cursor.sort({time: 1});
 			}
 			
-			callback(null, db, cursor, elapsed, units);
+			callback(null, db, cursor, elapsed, units, res);
 		}, processor
 		], cb);
 	});
@@ -469,7 +469,7 @@ var getAggregateParams = function(projection, elapsed) {
 	};
 };
 
-var getRange = function(dgm, start, end, desired, processor, cb) {
+var getRange = function(dgm, start, end, desired, processor, cb, res) {
 	// Gets data between two times from the database
 	
 	if (dgm == null || dgm.length == 0) {
@@ -533,7 +533,7 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 					cursor.sort({time: 1});
 				}
 				
-				callback(null, db, cursor, duration, units);
+				callback(null, db, cursor, duration, units, res);
 			}, processor
 		], cb);
 	});
