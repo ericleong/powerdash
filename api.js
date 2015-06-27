@@ -165,7 +165,7 @@ var toRickshaw = function(db, cursor, duration, units, cb) {
 	});
 };
 
-var toCSV = function(db, cursor, duration, units, callback) {
+var toCSV = function(db, cursor, duration, units, callback, res) {
 	// creates a csv file
 	
 	var csv = '';
@@ -180,8 +180,12 @@ var toCSV = function(db, cursor, duration, units, callback) {
 					continue;
 				header.push(col);
 			}
-			
-			csv += header.toString();
+
+			if (res) {
+				res.write(header.toString());
+			} else {
+				csv += header.toString();
+			}
 		}
 		
 		var row = [];
@@ -195,13 +199,19 @@ var toCSV = function(db, cursor, duration, units, callback) {
 		}
 		
 		if (row) {
-			csv += '\n' + row.toString();
+			if (res) {
+				res.write('\n' + row.toString());
+			} else {
+				csv += '\n' + row.toString();
+			}
 		}
 	}, function(err) {
 		db.close();
 
 		if (err) {
 			callback(err);
+		} else if (res) {
+			callback(null);
 		} else {
 			callback(null, csv);
 		}
@@ -241,7 +251,7 @@ var toArray = function(db, cursor, duration, units, callback) {
 
 	cursor.toArray(function(err, results) {
 		db.close();
-		callback(null, results);
+		callback(err, results);
 	});
 };
 
@@ -636,7 +646,7 @@ var generateCSV = function(dgms, variables, method, res, cb) {
 			cb(null);
 		});	
 	} else {
-		method(dgms[0], variables, toCSV, cb);
+		method(dgms[0], variables, toCSV, cb, res);
 	}
 };
 
