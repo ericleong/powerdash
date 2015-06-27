@@ -211,16 +211,21 @@ app.get('/recent', function(req, res) {
 	var dgm = req.query['dgm'] ? req.query['dgm'] : 'x-pml:/diagrams/ud/41cooper.dgm';
 
 	if (req.query['format'] == 'csv') {
+		
+		res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
+		
 		api.generateCSV(dgm.split(','), variables, 
 			function(dgm, variables, method, callback) {
 				api.getRecent(dgm, elapsed, variables, method, callback);
 			}, 
+			res,
 			function(err, data) {
 				if (err) {
 					res.status(500).send(err);
-				} else {
-					res.attachment(moment().format('YYYY-MM-DD-HH-mm-ss') + '.csv');
+				} else if (data) {
 					res.send(data);
+				} else {
+					res.end();
 				}
 			}
 		);
@@ -283,16 +288,20 @@ app.get('/range', function(req, res) {
 
 	if (req.query['format'] == 'csv') {
 		var formatString = 'YYYY-MM-DD-HH-mm-ss';
+		
+		res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
 
 		api.generateCSV(dgm.split(','), variables, 
 			function(dgm, variables, method, callback) {
 				api.getRange(dgm, range.start, range.end, variables, method, callback);
-			}, function(err, data) {
+			}, 
+			res, function(err, data) {
 				if (err) {
 					res.status(500).send(err);
-				} else {
-					res.attachment(moment(range.start).format(formatString) + '_' + moment(range.end).format(formatString) + '.csv');
+				} else if (data) {
 					res.send(data);
+				} else {
+					res.end();
 				}
 			}
 		);

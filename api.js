@@ -529,7 +529,7 @@ var getRange = function(dgm, start, end, desired, processor, cb) {
 	});
 };
 
-var generateCSV = function(dgms, variables, method, cb) {
+var generateCSV = function(dgms, variables, method, res, cb) {
 	if (dgms.length > 1) {
 		// handling multiple dgms is tricky
 		var genArray = function(dgm, callback) {
@@ -538,7 +538,6 @@ var generateCSV = function(dgms, variables, method, cb) {
 
 		async.map(dgms, genArray, function(err, results) {
 
-			var csv = '';
 			var header = [];
 			var humanHeader = [];
 
@@ -575,9 +574,9 @@ var generateCSV = function(dgms, variables, method, cb) {
 			}
 
 			if (variables != 'all') {
-				csv += humanHeader.toString();
+				res.write(humanHeader.toString());
 			} else {
-				csv += header.toString();
+				res.write(header.toString());
 			}
 
 			do {
@@ -630,11 +629,11 @@ var generateCSV = function(dgms, variables, method, cb) {
 				}
 
 				if (!finished) {
-					csv += '\n' + line.toString();
+					res.write('\n' + line.toString());
 				}
 			} while (!finished);
 
-			cb(null, csv);
+			cb(null);
 		});	
 	} else {
 		method(dgms[0], variables, toCSV, cb);
