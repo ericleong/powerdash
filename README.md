@@ -338,7 +338,7 @@ Data is stored in mongodb, a NoSQL document database. Data is stored in the `ene
 
 For Modbus queries, the `name` specified in `auth.json` is used as the name of the collection.
 
-For NTLM queries, each `dgm` specified in `scrape.json` corresponds to another collection in the database. Note that the names are "cleaned" by replacing forward slashes (`/`) with dashes (`-`). This facilitates saving the database to a file using `mongoexport`.
+For NTLM queries, each `dgm` specified in `scrape.json` corresponds to another collection in the database. Note that the names are "cleaned" by replacing colons (`:`) with underscores (`_`) and forward slashes (`/`) with dashes (`-`). This facilitates saving the database to a file using `mongoexport`.
 
 Additional metadata for each collection is specified in another collection, named by prepending `meta_` to the name of the collection it corresponds to. Therefore the list of collections for the above NTLM query (where `dgm` is `x-pml:/diagrams/ud/41cooper.dgm`) would be
 
