@@ -2,13 +2,20 @@ doctype html
 html(lang='en')
 	head
 		include includes/head
-		link(rel='stylesheet', href='./css/save.css')
+		link(rel='stylesheet', href='/css/save.css')
+		link(rel='stylesheet', href='/css/style.css')
 		script(src='/socket.io/socket.io.js')
 		script(src='/js/settings.js')
 		script(src='/js/save.js')
 	body
+		include includes/header
+
 		div.container
-			h1#amount 
+			div.bucket
+				h1#amount
+			h2 of water saved
+				br 
+				|since October 5, 2011
 		
 		script.
 				var dashmeter = new dashMeter(host, '!{dgm}', '!{variables}', !{latest});
