@@ -10,6 +10,14 @@ html, body {
 	box-sizing: border-box;
 }
 
+.container a, .container a:link, .container a:visited {
+	color: #6093c8;
+}
+
+.container a:hover, .container a:active {
+	color: #6b6b6b;
+}
+
 .bucket {
 	background-image: url('../images/bucket.jpg');
 	background-size: contain;
