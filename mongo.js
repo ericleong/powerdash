@@ -4,8 +4,8 @@ var getMongoUrl = function() {
 	var mongourl;
 
 	if (process.env.NODE_ENV == 'production') {
-		if (process.env.MONGO_URL) {
-			mongourl = process.env.MONGO_URL;
+		if (process.env.MONGOLAB_URI) {
+			mongourl = process.env.MONGOLAB_URI;
 		} else {
 			// last resort
 			mongourl = generate_mongo_url();
