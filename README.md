@@ -19,6 +19,8 @@ After you [clone this repository](https://help.github.com/articles/cloning-a-rep
 $ npm install
 ```
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ### Configuration
 
 #### Retrieving Data

@@ -1,0 +1,24 @@
+{
+  "name": "powerdash",
+  "description": "Dashboard for energy consumption at 41 Cooper Square.",
+  "repository": "https://github.com/ericleong/powerdash",
+  "logo": "http://cooper-powerdash.herokuapp.com/icon/launcher-4x.png",
+  "website": "http://cooper-powerdash.herokuapp.com",
+  "addons": [
+    "mongolab"
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Whether or not this is a production or development environment.",
+      "value": "production"
+    },
+    "AUTH": {
+    	"description": "A JSON string with authentication credentials."
+    }
+  },
+  "keywords": [
+    "node",
+    "express",
+    "mongodb"
+  ]
+}
