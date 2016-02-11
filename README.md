@@ -179,7 +179,7 @@ This method allows new datapoints to be uploaded to the server.
 
 | Parameter      | Type   | Description                                                                | Default | Required |
 | -------------- | ------ | -------------------------------------------------------------------------- | ------- | -------- |
-| **collection** | String | Name of the collection the data belongs to                                 | None    | _Yes_    |
+| **collection** | String | Name of the collection the data belongs to, before it is "cleaned"         | None    | _Yes_    |
 | **data**       | Binary | [CSV](//en.wikipedia.org/wiki/Comma-separated_values) file with header row | None    | _Yes_    |
 
 ### Response
