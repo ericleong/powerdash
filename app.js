@@ -191,11 +191,6 @@ app.get('/breakdown', function(req, res) {
 	});
 });
 
-app.get('/js/settings.js', function(req, res) {
-	res.type('application/javascript');
-	res.send('var host = "//' + host + '";');
-});
-
 app.get('/recent', function(req, res) {
 	var elapsed = req.query['elapsed'] ? req.query['elapsed'] : 60*60*1000;
 

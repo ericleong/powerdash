@@ -5,7 +5,6 @@ html(lang='en')
 		link(rel='stylesheet', href='/css/save.css')
 		link(rel='stylesheet', href='/css/style.css')
 		script(src='/socket.io/socket.io.js')
-		script(src='/js/settings.js')
 		script(src='/js/save.js')
 	body
 		include includes/header
@@ -20,4 +19,4 @@ html(lang='en')
 				|since October 5, 2011
 		
 		script.
-				var dashmeter = new dashMeter(host, '!{dgm}', '!{variables}', !{latest});
+				var dashmeter = new dashMeter(window.location.host, '!{dgm}', '!{variables}', !{latest});

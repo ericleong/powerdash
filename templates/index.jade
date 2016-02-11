@@ -12,7 +12,6 @@ html(lang='en')
 		script(src='//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js')
 		script(src='/js/moment.min.js')
 		script(src='/js/rickshaw.min.js')
-		script(src='/js/settings.js')
 		script(src='/js/chart.js')
 	body
 		include includes/header
@@ -68,7 +67,7 @@ html(lang='en')
 		footer Created by #[a(href='//ericleong.me') Eric Leong] under the advisement of #[a(href='//engfac.cooper.edu/melody/10') Prof. Melody Baglione] with partial support from the National Science Foundation under #[a(href='//www.nsf.gov/awardsearch/showAward?AWD_ID=1044830') grant no. DUE 104483]
 		if disable
 			script.
-				var dashchart = new dashChart(host, !{points}, !{elapsed}, !{disable}, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
+				var dashchart = new dashChart(window.location.host, !{points}, !{elapsed}, !{disable}, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
 		else
 			script.
-				var dashchart = new dashChart(host, !{points}, !{elapsed}, null, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');
+				var dashchart = new dashChart(window.location.host, !{points}, !{elapsed}, null, '!{unit}', '!{min}' == '0' ? 0 : '!{min}');

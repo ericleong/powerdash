@@ -21,14 +21,7 @@ $ npm install
 
 ### Configuration
 
-#### socket.io
-
-The server's domain is needed for `socket.io`. The default domain is `localhost:8080`. To change it, either:
-
-* Set the environment variable `NODE_ENV` to `production` and create an environment variable named `DOMAIN` with the domain.
-* Modify `app.js` and change the `host` variable to the domain.
-
-#### Retreiving Data
+#### Retrieving Data
 
 To retrieve data, either:
 
