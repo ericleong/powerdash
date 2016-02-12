@@ -295,7 +295,11 @@ dashChart.prototype.loadSeries = function(dgm, variables) {
 dashChart.prototype.setRenderer = function(renderer) {
 	if (renderer == 'bar') {
 		// Disable a series if it represents the sum of other series
-		this.disableSeries('Total KW');
+		for (var p in this.points) {
+			if (this.points[p].sum) {
+				this.disableSeries(this.points[p].sum);
+			}
+		}
 		
 		Rickshaw.Series.fill(this.series, 0);
 	}

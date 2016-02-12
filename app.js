@@ -39,14 +39,16 @@ app.get('/', function(req, res) {
 		points: JSON.stringify([
 		{
 			dgm: 'x-pml:/diagrams/ud/41cooper.dgm',
-			variables: ['SRV1PKW', 'SV2PKW', 'Total KW', 'kW tot@CUCOGEN', 'CU_TOT_KW']
+			variables: ['Total KW', 'kW tot@CUCOGEN', 'CU_TOT_KW', 'SRV1PKW', 'SV2PKW'],
+			sum: 'CU_TOT_KW'
 		}
 		]),
 		unit: 'kW',
 		min: 0,
 		elapsed: 2 * 60 * 60 * 1000,
 		setname: 'Electricity Consumption',
-		description: 'The utility electricity usage.'
+		description: 'The utility electricity usage.',
+		disable: JSON.stringify(['SRV1PKW', 'SV2PKW'])
 	});
 });
 
