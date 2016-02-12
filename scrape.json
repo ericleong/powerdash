@@ -6,7 +6,9 @@
     "desired": [
       "SRV1PKW",
       "SV2PKW",
-      "Total KW"
+      "Total KW",
+      "kW tot@CUCOGEN",
+      "CU_TOT_KW"
     ]
   },
   {

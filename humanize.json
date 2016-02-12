@@ -4,6 +4,8 @@
   "SV2PKW": "Utility Service 2",
   "SRV1KW": "Utility Service 1",
   "SV2KW": "Utility Service 2",
+  "kW tot@CUCOGEN": "Cogen Production",
+  "CU_TOT_KW": "Total Building Usage",
   "SATEC17KW": "Retail",
   "SATEC12KW": "3rd fl lights",
   "SATEC13KW": "4th fl lights",
