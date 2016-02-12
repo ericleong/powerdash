@@ -39,11 +39,7 @@ app.get('/', function(req, res) {
 		points: JSON.stringify([
 		{
 			dgm: 'x-pml:/diagrams/ud/41cooper.dgm',
-			variables: ['SRV1PKW', 'SV2PKW', 'Total KW']
-		},
-		{
-			dgm: 'cogen',
-			variables: ['kW Production']
+			variables: ['SRV1PKW', 'SV2PKW', 'Total KW', 'kW tot@CUCOGEN', 'CU_TOT_KW']
 		}
 		]),
 		unit: 'kW',
