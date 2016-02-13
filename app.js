@@ -157,27 +157,60 @@ app.get('/breakdown', function(req, res) {
 			variables: ['Total KW']
 		},
 		// retail
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 rt.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 rt.dgm',
+			variables: ['SATEC17KW']
+		},
 		// 3rd floor lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/413tl.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/413tl.dgm',
+			variables: ['SATEC12KW']
+		},
 		// 4th floor lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/414tl.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/414tl.dgm',
+			variables: ['SATEC13KW']
+		},
 		// 6th floor lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/416fltl.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/416fltl.dgm',
+			variables: ['SATEC14KW']
+		},
 		// 7th floor lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/417fltl.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/417fltl.dgm',
+			variables: ['SATEC15KW']
+		},
 		// roof mechanical
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 rdhm.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 rdhm.dgm',
+			variables: ['SATEC18KW']
+		},
 		// sub-cellar power and lighting
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 5-dh.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 5-dh.dgm',
+			variables: ['SATEC19KW']
+		},
 		// cellar power and lighting
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 cdh.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 cdh.dgm',
+			variables: ['SATEC110KW']
+		},
 		// 4th floor mechanical 2nd,3rd,5th lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 4-dh.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 4-dh.dgm',
+			variables: ['SATEC111KW']
+		},
 		// 7th floor mechanical, 8th and 9th lighting and plugs
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41 7-dh.dgm'},
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41 7-dh.dgm',
+			variables: ['SATEC112KW']
+		},
 		// elevators
-		{dgm: 'x-pml:/diagrams/ud/41cooper/41elevator.dgm'}
+		{
+			dgm: 'x-pml:/diagrams/ud/41cooper/41elevator.dgm',
+			variables: ['SATEC11KW']
+		}
 		]),
 		unit: 'kW',
 		min: 'auto',

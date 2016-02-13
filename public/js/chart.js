@@ -528,7 +528,7 @@ dashChart.prototype.disableSeries = function(disable) {
 					this.series[i].disable();
 				}
 			} catch (e) {
-				console.error('Could not disable ' + disable);
+				console.warn('Could not disable ' + disable);
 			}
 		}
 		

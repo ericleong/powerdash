@@ -175,10 +175,16 @@ var toCSV = function(db, cursor, duration, units, res, callback) {
 		if (header.length == 0) {
 			header.push('time');
 			
-			for (var col in doc) {
-				if (col == 'time' || col == '_id')
-					continue;
-				header.push(col);
+			if (units) {
+				for (var unit in units) {
+					header.push(unit);
+				}
+			} else {
+				for (var col in doc) {
+					if (col == 'time' || col == '_id')
+						continue;
+					header.push(col);
+				}
 			}
 
 			if (res) {
