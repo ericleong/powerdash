@@ -118,12 +118,16 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
 					lastTime = time;
 					num = 1;
 				} else { // same block
+					var bad = '';
 					for (var col in row) {
-						if (typeof doc[col] == 'number') {
+						if (typeof doc[col] == 'number' && isFinite(doc[col])) {
 							row[col] += doc[col];
-						} else {
-							console.warn(time + ': ' + col + ' == ' + doc[col]);
+						} else if (doc[col]) {
+							bad += ' ' + col + ' == ' + doc[col];
 						}
+					}
+					if (bad.length > 0) {
+						console.warn(time + ':' + bad);
 					}
 					num++;
 				}
@@ -692,9 +696,6 @@ var upload = function(dgm, file, callback) {
 			var header = [];
 
 			rd.on('close', function() {
-
-				fs.unlink(file);
-
 				batch.execute(function(err, result) {
 					db.close();
 
@@ -712,6 +713,12 @@ var upload = function(dgm, file, callback) {
 							});
 						}
 					}
+					
+					fs.unlink(file, function(err) {
+						if (err) {
+							console.error('Could not delete file: ' + err.message);
+						}
+					});
 				});
 			});
 
