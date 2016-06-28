@@ -107,7 +107,11 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
 		} else {
 
 			for (var r in reset) {
-				time.set(reset[r], 0);
+				if (reset[r] == 'date') {
+					time.set(reset[r], 1); // date of month is 1-index
+				} else {
+					time.set(reset[r], 0);
+				}
 			}
 
 			if (lastTime) {
