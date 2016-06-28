@@ -65,6 +65,11 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
 			if (duration > 1000*60*60*24*7*4*6) { // 6 months
 				reset.push('day'); // group by week
 				dt *= 7;
+
+				if (duration > 1000*60*60*24*366) { // 1 (leap) year
+					reset.push('date'); // group by month
+					dt *= 30.5 / 7;
+				}
 			}
 		}	
 	}

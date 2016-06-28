@@ -203,6 +203,12 @@ var dashChart = function(host, points, elapsed, disable, unit, min) {
 			chart.setRenderer('bar');
 			chart.loadPoints();
 			$('#pause').prop('disabled', true);
+		} else if ($(this).val() == 'two-years') {
+			chart.setElapsed(2*365*24*60*60*1000); // 2x365 days
+			chart.setPaused(true);
+			chart.setRenderer('bar');
+			chart.loadPoints();
+			$('#pause').prop('disabled', true);
 		}
 	});
 	
