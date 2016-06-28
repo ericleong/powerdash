@@ -407,12 +407,14 @@ dashChart.prototype.createGraph = function(dataset) {
 			var d = moment(x * 1000);
 			if (chart.elapsed < 2*7*24*60*60*1000) {
 				return d.format('MMM DD hh:mm:ss a');
-			} else if (chart.elapsed < 2*4*7*24*60*60*1000) {
+			} else if (chart.elapsed < 2*4*7*24*60*60*1000) { // 2 months
 				return d.format('MMM DD hh:mm a');
-			} else if (chart.elapsed < 365*24*60*60*1000) {
+			} else if (chart.elapsed < 12*4*7*24*60*60*1000) { // 12 months (12x28 days)
 				return d.format('MMM DD');
-			} else {
+			} else if (chart.elapsed < 1.1*365*24*60*60*1000) { // 1.1 years
 				return d.format('MMM DD') + ' - ' + d.add(1, 'weeks').format('MMM DD');
+			} else {
+				return d.format('MMM YYYY')
 			}
 		},
 		yFormatter: function(y) {
