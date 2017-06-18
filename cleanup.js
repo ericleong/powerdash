@@ -32,7 +32,7 @@ var condense = function(batch, ids, row, lastTime, num, dt) {
 	batch.insert(new_row);
 };
 
-function cleanup(dgm, time) {
+function cleanup(dgm) {
 	// Gets a recent set of data from the database
 	
 	if (dgm == null || dgm.length == 0) {
@@ -68,6 +68,9 @@ function cleanup(dgm, time) {
 		
 			if (doc.time) {
 				time = moment.tz(doc.time, 'America/New_York');
+			} else {
+				console.error('Missing time in document in ' + dgm);
+				return;
 			}
 
 			time.set('millisecond', 0);
@@ -142,16 +145,21 @@ function cleanup(dgm, time) {
 				return;
 			}
 
-			condense(batch, ids, row, lastTime, num, dt);
+			if (lastTime) {
+				condense(batch, ids, row, lastTime, num, dt);
 
-			batch.execute(function(err, result) {
+				batch.execute(function(err, result) {
+					db.close();
+
+					if (err) {
+						console.error(err);
+						return;
+					}
+				});
+			} else {
 				db.close();
-
-				if (err) {
-					console.error(err);
-					return;
-				}
-			});
+				console.error('Missing lastTime.');
+			}
 		});
 	});
 }
