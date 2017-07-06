@@ -59,7 +59,7 @@ function cleanup(dgm) {
 		var dt = 1;
 		var count = 0;
 
-		var cursor = collection.find({ time: { $gte: new Date(2017, 05, 28), $lt: new Date(2017, 06, 16) }});
+		var cursor = collection.find({ time: { $gte: new Date(2017, 06, 01), $lt: new Date(2017, 07, 05) }});
 		cursor.sort({time: 1});
 
 		cursor.forEach(function(doc) {
