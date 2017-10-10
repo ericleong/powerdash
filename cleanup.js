@@ -1,4 +1,5 @@
 var moment = require('moment-timezone'),
+	async = require('async'),
 	MongoClient = require('mongodb').MongoClient,
 	mongo = require('./mongo.js'),
 	cleanDGM = require('./utils.js').cleanDGM,
@@ -10,11 +11,20 @@ var mongourl = mongo.getMongoUrl();
 var scrapeList = require('./scrape.json');
 
 if (scrapeList && scrapeList.length) {
-	for (var i = 0; i < scrapeList.length; i++) {
-		if (scrapeList[i].type == 'ntlm') {
-			cleanup(scrapeList[i].dgm);
-		}
-	}
+
+	async.filter(scrapeList, 
+		function(item, callback) {
+			callback(item.type == 'ntlm');
+		},
+		function(results) {
+			async.eachSeries(results, 
+				function(item, callback) {
+					cleanup(item.dgm, callback);
+				},
+				function(err) {
+					console.log('Done!');
+				});
+		});
 }
 
 // Saves a block (chunk) of data
@@ -32,10 +42,11 @@ var condense = function(batch, ids, row, lastTime, num, dt) {
 	batch.insert(new_row);
 };
 
-function cleanup(dgm) {
+function cleanup(dgm, callback) {
 	// Gets a recent set of data from the database
 	
 	if (dgm == null || dgm.length == 0) {
+		callback(null);
 		return;
 	}
 	
@@ -43,6 +54,7 @@ function cleanup(dgm) {
 	MongoClient.connect(mongourl, function(err, db) {
 		if (err) {
 			console.error(err);
+			callback(null);
 			return;
 		}
 
@@ -154,6 +166,7 @@ function cleanup(dgm) {
 
 			if (err) {
 				console.error(err);
+				callback(err);
 				return;
 			}
 
@@ -165,15 +178,19 @@ function cleanup(dgm) {
 
 					if (err) {
 						console.error(err);
+						callback(null);
 						return;
 					}
 
 					console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 					console.log("Finished " + dgm);
+
+					callback(null);
 				});
 			} else {
 				db.close();
-				console.error('Missing lastTime.');
+				console.error('Missing lastTime for ' + dgm);
+				callback('Missing lastTime.');
 			}
 		});
 	});
