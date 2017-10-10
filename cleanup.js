@@ -221,7 +221,7 @@ function cleanup(start, end, dgm, callback) {
 				console.error('Missing lastTime for ' + dgm);
 				if (batches.length <= 0) {
 					db.close();
-					callback('Missing lastTime.');
+					callback(null);
 				}
 			}
 		});
