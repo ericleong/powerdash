@@ -33,6 +33,8 @@ if (scrapeList && scrapeList.length) {
 							var today = day.toDate();
 							var tomorrow = day.clone().add(1, 'days').toDate();
 
+							console.log(day.format('YYYY-MM-DD') + ' : ' + item.dgm);
+
 							cleanup(today, tomorrow, item.dgm, callback);
 						}, callback);
 				},
