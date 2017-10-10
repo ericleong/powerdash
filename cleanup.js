@@ -59,7 +59,12 @@ function cleanup(dgm) {
 		var dt = 1;
 		var count = 0;
 
-		var cursor = collection.find({ time: { $gte: new Date(2017, 07, 05), $lt: new Date(2017, 10, 08) }});
+		var start = new Date(2017, 07, 05);
+		var end = new Date(2017, 10, 08);
+
+		console.log("There are " + collection.count({ time: { $gte: start, $lt: end }}) + " elements.")
+
+		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
 
 		cursor.forEach(function(doc) {
