@@ -12,14 +12,29 @@ var scrapeList = require('./scrape.json');
 
 if (scrapeList && scrapeList.length) {
 
+	var start = moment('2015-01-01');
+	var end = moment('2017-10-10');
+
+	var days = [];
+
+	for (var m = moment(start); m.isBefore(end); m.add(1, 'days')) {
+		days.push(m.clone());
+	}
+
 	async.filter(scrapeList, 
 		function(item, callback) {
 			callback(item.type == 'ntlm');
 		},
 		function(results) {
-			async.eachSeries(results, 
-				function(item, callback) {
-					cleanup(item.dgm, callback);
+			async.eachSeries(days, 
+				function(day, callback) {
+					async.eachSeries(results, 
+						function(item, callback) {
+							var today = day.toDate();
+							var tomorrow = day.clone().add(1, 'days').toDate();
+
+							cleanup(today, tomorrow, item.dgm, callback);
+						}, callback);
 				},
 				function(err) {
 					console.log('Done!');
@@ -42,7 +57,7 @@ var condense = function(batch, ids, row, lastTime, num, dt) {
 	batch.insert(new_row);
 };
 
-function cleanup(dgm, callback) {
+function cleanup(start, end, dgm, callback) {
 	// Gets a recent set of data from the database
 	
 	if (dgm == null || dgm.length == 0) {
@@ -73,9 +88,6 @@ function cleanup(dgm, callback) {
 		
 		var dt = 1;
 		var count = 0;
-
-		var start = new Date(2017, 08, 01);
-		var end = new Date(2017, 08, 02);
 
 		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
