@@ -62,7 +62,14 @@ function cleanup(dgm) {
 		var start = new Date(2017, 07, 05);
 		var end = new Date(2017, 10, 08);
 
-		console.log("There are " + collection.count({ time: { $gte: start, $lt: end }}) + " elements.")
+		collection.count({ time: { $gte: start, $lt: end }}, function(err, result) {
+			if (err) {
+				console.error("Could not get count of " + dgm);
+				return;
+			}
+
+			console.log("There are " + result + " elements in " + dgm)
+		});
 
 		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
