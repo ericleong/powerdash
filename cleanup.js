@@ -65,6 +65,7 @@ function cleanup(dgm, callback) {
 
 		var batch = collection.initializeOrderedBulkOp();
 		var batches = 0;
+		var done = false;
 		var lastTime = undefined;
 		var row = {};
 		var num = 0;
@@ -111,7 +112,7 @@ function cleanup(dgm, callback) {
 								console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 							}
 
-							if (batches <= 0) {
+							if (batches <= 0 && done) {
 								db.close();
 								console.log("Finished " + dgm);
 								callback(null);
@@ -164,6 +165,8 @@ function cleanup(dgm, callback) {
 
 		}, function(err) {
 
+			done = true;
+
 			if (err) {
 				console.error(err);
 				callback(err);
@@ -182,7 +185,7 @@ function cleanup(dgm, callback) {
 						console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 					}
 
-					if (batches <= 0) {
+					if (batches <= 0 && done) {
 						db.close();
 						console.log("Finished " + dgm);
 						callback(null);
