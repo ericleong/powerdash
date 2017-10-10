@@ -71,17 +71,8 @@ function cleanup(dgm, callback) {
 		var dt = 1;
 		var count = 0;
 
-		var start = new Date(2017, 09, 08);
-		var end = new Date(2017, 09, 09);
-
-		collection.count({ time: { $gte: start, $lt: end }}, function(err, result) {
-			if (err) {
-				console.error("Could not get count of " + dgm);
-				return;
-			}
-
-			console.log("There are " + result + " elements in " + dgm)
-		});
+		var start = new Date(2017, 09, 09);
+		var end = new Date(2017, 09, 10);
 
 		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
