@@ -103,7 +103,7 @@ function cleanup(dgm) {
 								return;
 							}
 
-							console.log(result.nInserted + ", " + result.nRemoved);
+							console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 						});
 
 						count = 0;
@@ -167,6 +167,9 @@ function cleanup(dgm) {
 						console.error(err);
 						return;
 					}
+
+					console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
+					console.log("Finished " + dgm);
 				});
 			} else {
 				db.close();
