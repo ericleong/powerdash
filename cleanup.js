@@ -74,8 +74,8 @@ function cleanup(dgm, callback) {
 		var dt = 1;
 		var count = 0;
 
-		var start = new Date(2017, 09, 09);
-		var end = new Date(2017, 09, 10);
+		var start = new Date(2014, 00, 01);
+		var end = new Date(2017, 07, 01);
 
 		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
@@ -102,7 +102,7 @@ function cleanup(dgm, callback) {
 
 					count++;
 
-					if (count > 60) {
+					if (count >= 60) {
 						batchCounter++;
 
 						var batchId = batchCounter;
@@ -115,7 +115,7 @@ function cleanup(dgm, callback) {
 							if (err) {
 								console.error(err);
 							} else {
-								console.log(dgm + ":" + batchId + ":" + result.nInserted + ", " + result.nRemoved);
+								console.log(dgm + ":" + batchId + ": " + result.nInserted + ", " + result.nRemoved);
 							}
 
 							if (batches.length <= 0 && done) {
@@ -194,7 +194,7 @@ function cleanup(dgm, callback) {
 					if (err) {
 						console.error(err);
 					} else {
-						console.log(dgm + ":" + batchId + ":" + result.nInserted + ", " + result.nRemoved);
+						console.log(dgm + ":" + batchId + ": " + result.nInserted + ", " + result.nRemoved);
 					}
 
 					if (batches.length <= 0 && done) {
