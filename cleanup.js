@@ -59,8 +59,8 @@ function cleanup(dgm) {
 		var dt = 1;
 		var count = 0;
 
-		var start = new Date(2017, 07, 05);
-		var end = new Date(2017, 10, 08);
+		var start = new Date(2017, 10, 08);
+		var end = new Date(2017, 10, 09);
 
 		collection.count({ time: { $gte: start, $lt: end }}, function(err, result) {
 			if (err) {
