@@ -64,6 +64,7 @@ function cleanup(dgm, callback) {
 		var ids = [];
 
 		var batch = collection.initializeOrderedBulkOp();
+		var batches = 0;
 		var lastTime = undefined;
 		var row = {};
 		var num = 0;
@@ -100,13 +101,21 @@ function cleanup(dgm, callback) {
 					count++;
 
 					if (count > 60) {
+						batches++;
 						batch.execute(function(err, result) {
+							batches--;
+
 							if (err) {
 								console.error(err);
-								return;
+							} else {
+								console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 							}
 
-							console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
+							if (batches <= 0) {
+								db.close();
+								console.log("Finished " + dgm);
+								callback(null);
+							}
 						});
 
 						count = 0;
@@ -165,23 +174,26 @@ function cleanup(dgm, callback) {
 				condense(batch, ids, row, lastTime, num, dt);
 
 				batch.execute(function(err, result) {
-					db.close();
+					batches--;
 
 					if (err) {
 						console.error(err);
-						callback(null);
-						return;
+					} else {
+						console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
 					}
 
-					console.log(dgm + ": " + result.nInserted + ", " + result.nRemoved);
-					console.log("Finished " + dgm);
-
-					callback(null);
+					if (batches <= 0) {
+						db.close();
+						console.log("Finished " + dgm);
+						callback(null);
+					}
 				});
 			} else {
-				db.close();
 				console.error('Missing lastTime for ' + dgm);
-				callback('Missing lastTime.');
+				if (batches <= 0) {
+					db.close();
+					callback('Missing lastTime.');
+				}
 			}
 		});
 	});
