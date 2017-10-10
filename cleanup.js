@@ -74,8 +74,8 @@ function cleanup(dgm, callback) {
 		var dt = 1;
 		var count = 0;
 
-		var start = new Date(2014, 00, 01);
-		var end = new Date(2017, 07, 01);
+		var start = new Date(2017, 08, 01);
+		var end = new Date(2017, 09, 01);
 
 		var cursor = collection.find({ time: { $gte: start, $lt: end }});
 		cursor.sort({time: 1});
