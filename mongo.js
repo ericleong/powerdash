@@ -1,7 +1,12 @@
 'use strict';
 
 var getMongoDbName = function() {
-  return 'energydata'
+  if (process.env.NODE_ENV == 'production') {
+    if (process.env.MONGOLAB_DB) {
+      return MONGOLAB_DB;
+    }
+  }
+  return 'energydata';
 }
 
 var getMongoUrl = function() {
