@@ -8,22 +8,17 @@
     "bufferlist": "^0.1.0",
     "connect-multiparty": "^2.0.0",
     "express": "^4.17.1",
-    "jade": "^1.11.0",
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
-    "mongodb": "^2.1.7",
+    "mongodb": "^3.5.9",
     "ntlm-auth": "^0.1.1",
+    "pug": "^3.0.0",
     "put": "0.0.6",
-    "socket.io": "^1.4.5",
+    "socket.io": "^2.3.0",
     "stream-stack": "^1.1.4",
     "xml2js": "^0.4.23"
   },
-  "devDependencies": {
-    "eslint": "^3.4.0",
-    "eslint-config-airbnb": "^11.0.0",
-    "eslint-config-airbnb-base": "^7.0.0",
-    "eslint-plugin-import": "^1.14.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./app.js"

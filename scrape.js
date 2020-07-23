@@ -11,6 +11,7 @@ var async = require('async'),
   cleanDGM = require('./utils.js').cleanDGM;
 
 var mongourl = mongo.getMongoUrl();
+var dbname = mongo.getMongoDbName();
 
 /* Poll the power consumption website */
 
@@ -46,9 +47,10 @@ function storeNtlmMeta(dgm, items) {
   // Store metadata (handle, units, etc)
 
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if(err) { return console.dir(err); }
-    
+
+    const db = client.db(dbname);
     db.collection('meta_' + cleanDGM(dgm), function(err, collection) {
       
       collection.ensureIndex({h: 1, name: 1}, function() {
@@ -76,7 +78,7 @@ function storeNtlmMeta(dgm, items) {
             callback(null);
           });
         }, function(err) {
-          db.close();
+          client.close();
         });
       });
     });
@@ -108,9 +110,10 @@ function storeNtlmData(dgm, items, timestamp) {
   }
   
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if(err) { return console.warn(err); }
     
+    const db = client.db(dbname);
     db.collection(cleanDGM(dgm), function(err, collection) {
       
       collection.ensureIndex('time', function() {
@@ -120,7 +123,7 @@ function storeNtlmData(dgm, items, timestamp) {
         }, function(err, result) {
           if (err) console.warn(err.message);
 
-          db.close();
+          client.close();
         });
       });
     });
@@ -255,9 +258,10 @@ function storeModbusData(dgm, items, timestamp) {
     return;
   
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if(err) { return console.dir(err); }
     
+    const db = client.db(dbname);
     db.collection(cleanDGM(dgm), function(err, collection) {
       
       collection.ensureIndex('time', function() {
@@ -268,7 +272,7 @@ function storeModbusData(dgm, items, timestamp) {
           if (err) {
             console.warn('error storing modbus data: ' + err.message);
           }
-          db.close();
+          client.close();
         });
       });
     });
@@ -279,9 +283,10 @@ function storeModbusMeta(dgm, items) {
   // Store metadata (handle, units, etc)
 
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if(err) { return console.dir(err); }
     
+    const db = client.db(dbname);
     db.collection('meta_' + cleanDGM(dgm), function(err, collection) {
       
       collection.ensureIndex({h: 1, name: 1}, function() {
@@ -307,7 +312,7 @@ function storeModbusMeta(dgm, items) {
             console.warn('error storing modbus metadata: ' + err.message);  // returns error if no matching object found
           }
 
-          db.close();
+          client.close();
         });
       });
     });

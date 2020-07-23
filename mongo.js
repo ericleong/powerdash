@@ -1,5 +1,14 @@
 'use strict';
 
+var getMongoDbName = function() {
+  if (process.env.NODE_ENV == 'production') {
+    if (process.env.MONGOLAB_DB) {
+      return process.env.MONGOLAB_DB;
+    }
+  }
+  return 'energydata';
+}
+
 var getMongoUrl = function() {
   var mongourl;
 
@@ -24,7 +33,7 @@ var generate_mongo_url = function(obj) {
 
   obj.hostname = (obj.hostname || 'localhost');
   obj.port = (obj.port || 27017);
-  obj.db = (obj.db || 'energydata');
+  obj.db = (obj.db || getMongoDbName());
   if (obj.username && obj.password) {
     return 'mongodb://' + obj.username + ':' + obj.password + '@'
     + obj.hostname + ':' + obj.port + '/' + obj.db;
@@ -34,3 +43,4 @@ var generate_mongo_url = function(obj) {
 };
 
 module.exports.getMongoUrl = getMongoUrl;
+module.exports.getMongoDbName = getMongoDbName;
