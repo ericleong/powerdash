@@ -1,6 +1,6 @@
 {
   "name": "powerdash",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "a real time energy dashboard",
   "main": "app.js",
   "dependencies": {
@@ -16,7 +16,7 @@
     "put": "0.0.6",
     "socket.io": "^1.7.4",
     "stream-stack": "^1.1.4",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
@@ -36,7 +36,7 @@
   "license": "MIT",
   "subdomain": "powerdash",
   "engines": {
-    "node": "10.x"
+    "node": "14.x"
   },
   "repository": {
     "type": "git",
