@@ -8,7 +8,7 @@ Setup
 
 ### Requirements
 
-* [node.js](https://nodejs.org/) - 0.12.x
+* [node.js](https://nodejs.org/) - 0.14.x
 * [mongodb](https://www.mongodb.org/)
 
 ### Install
@@ -464,7 +464,7 @@ Libraries
 
 ### Backend
 
-* [express](http://expressjs.com/) as a server-side framework and template rendering via [jade](http://jade-lang.com/)
+* [express](http://expressjs.com/) as a server-side framework and template rendering via [pug](https://pugjs.org/)
 * [moment](http://momentjs.com/) to parse and render time information
 * [socket.io](http://socket.io/) to stream updates to the browser
 * [node-ntlm-auth](https://github.com/ericleong/node-ntlm-auth) for NTLM authentication
