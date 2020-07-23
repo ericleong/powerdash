@@ -21,6 +21,7 @@ npm-shrinkwrap.json
 .project
 *.sublime-project
 *.sublime-workspace
+.vscode/*
 
 # Secrets!
 auth.json
