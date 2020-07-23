@@ -68,7 +68,8 @@ $ mongod
 If you want to connect to a remote database, 
 
 1. Set the `NODE_ENV` environment variable to `production`
-2. Set the `MONGOLAB_URI` environment variable to the url of the database server.
+2. Set the `MONGOLAB_URI` environment variable to the url of the database server
+3. Set the `MONGOLAB_DB` environment variable to the name of the database
 
 #### Optional Configuration
 
