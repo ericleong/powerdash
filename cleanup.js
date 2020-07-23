@@ -12,8 +12,8 @@ var scrapeList = require('./scrape.json');
 
 if (scrapeList && scrapeList.length) {
 
-	var start = moment('2019-01-01');
-	var end = moment('2019-05-01');
+	var start = moment('2019-05-01');
+	var end = moment('2020-07-23');
 
 	var days = [];
 
