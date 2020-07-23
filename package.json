@@ -18,12 +18,7 @@
     "stream-stack": "^1.1.4",
     "xml2js": "^0.4.23"
   },
-  "devDependencies": {
-    "eslint": "^3.4.0",
-    "eslint-config-airbnb": "^11.0.0",
-    "eslint-config-airbnb-base": "^7.0.0",
-    "eslint-plugin-import": "^1.14.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./app.js"
