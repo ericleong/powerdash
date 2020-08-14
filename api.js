@@ -128,18 +128,22 @@ var toRickshaw = function(client, cursor, duration, units, res, cb) {
           lastTime = time;
           num = 1;
         } else { // same block
-          var bad = '';
-          for (var col in row) {
-            if (typeof doc[col] == 'number' && isFinite(doc[col])) {
-              row[col] += doc[col];
-            } else if (doc[col]) {
-              bad += ' ' + col + ' == ' + doc[col];
-            } else {
-              bad += ' ' + col + ' == ' + 'unknown';
+          var bad = [];
+          if (row.length == 0) {
+            bad.push(' no columns in row')
+          } else {
+            for (var col in row) {
+              if (typeof doc[col] == 'number' && isFinite(doc[col])) {
+                row[col] += doc[col];
+              } else if (doc[col]) {
+                bad.push(`${col} == ${doc[col]}`);
+              } else {
+                bad.push(`${col} == unknown`);
+              }
             }
           }
           if (bad.length > 0) {
-            console.warn(time + ':' + bad);
+            console.warn(time + ': ' + bad.join(', '));
           }
           num++;
         }
