@@ -2,7 +2,9 @@
 
 var getMongoDbName = function() {
   if (process.env.NODE_ENV == 'production') {
-    if (process.env.MONGOLAB_DB) {
+    if (process.env.MONGODB_ATLAS_URI) {
+      return process.env.MONGODB_ATLAS_URI;
+    } else if (process.env.MONGOLAB_DB) {
       return process.env.MONGOLAB_DB;
     }
   }
