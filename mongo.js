@@ -4,8 +4,6 @@ var getMongoDbName = function() {
   if (process.env.NODE_ENV == 'production') {
     if (process.env.MONGODB_ATLAS_DB) {
       return process.env.MONGODB_ATLAS_DB;
-    } else if (process.env.MONGOLAB_DB) {
-      return process.env.MONGOLAB_DB;
     }
   }
   return 'powerdash';
@@ -17,8 +15,6 @@ var getMongoUrl = function() {
   if (process.env.NODE_ENV == 'production') {
     if (process.env.MONGODB_ATLAS_URI) {
       return process.env.MONGODB_ATLAS_URI;
-    } else if (process.env.MONGOLAB_URI) {
-      mongourl = process.env.MONGOLAB_URI;
     } else {
       // last resort
       mongourl = generate_mongo_url();
