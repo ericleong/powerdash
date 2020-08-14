@@ -134,6 +134,8 @@ var toRickshaw = function(client, cursor, duration, units, res, cb) {
               row[col] += doc[col];
             } else if (doc[col]) {
               bad += ' ' + col + ' == ' + doc[col];
+            } else {
+              bad += ' ' + col + ' == ' + 'unknown';
             }
           }
           if (bad.length > 0) {
