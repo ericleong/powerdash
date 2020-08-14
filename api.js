@@ -25,7 +25,7 @@ var saveBlock = function(map, row, lastTime, num, dt) {
           y: row[col] / num * dt
         });
       } else {
-        console.warn(lastTime + ': ' + row[col] + ' ' + num);
+        console.warn(`${lastTime}: ${col} == ${row[col]}, num == ${num}, dt == ${dt}`)
       }
     } else {
       map[col] = [ {
