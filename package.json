@@ -12,7 +12,7 @@
     "moment-timezone": "^0.5.31",
     "mongodb": "^3.6.0",
     "ntlm-auth": "^0.1.1",
-    "pug": "^3.0.0",
+    "pug": "^3.0.1",
     "put": "0.0.6",
     "socket.io": "^2.4.0",
     "stream-stack": "^1.1.4",
