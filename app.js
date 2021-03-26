@@ -28,7 +28,7 @@ if (app.get('env') == 'production') {
 app.use(express.static(__dirname + '/public'));
 
 app.set('views', __dirname + '/templates');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 /* SERVER */
 

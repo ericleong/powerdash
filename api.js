@@ -10,6 +10,7 @@ var async = require('async'),
   cleanDGM = require('./utils.js').cleanDGM;
 
 var mongourl = mongo.getMongoUrl();
+var dbname = mongo.getMongoDbName();
 
 var humanize = require('./humanize.json');
 
@@ -24,7 +25,7 @@ var saveBlock = function(map, row, lastTime, num, dt) {
           y: row[col] / num * dt
         });
       } else {
-        console.warn(lastTime + ': ' + row[col] + ' ' + num);
+        console.warn(`${lastTime}: ${col} == ${row[col]}, num == ${num}, dt == ${dt}`)
       }
     } else {
       map[col] = [ {
@@ -35,7 +36,7 @@ var saveBlock = function(map, row, lastTime, num, dt) {
   }
 };
 
-var toRickshaw = function(db, cursor, duration, units, res, cb) {
+var toRickshaw = function(client, cursor, duration, units, res, cb) {
 
   // build a map of columns to data
   var map = {};
@@ -127,16 +128,22 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
           lastTime = time;
           num = 1;
         } else { // same block
-          var bad = '';
-          for (var col in row) {
-            if (typeof doc[col] == 'number' && isFinite(doc[col])) {
-              row[col] += doc[col];
-            } else if (doc[col]) {
-              bad += ' ' + col + ' == ' + doc[col];
+          var bad = [];
+          if (row.length == 0) {
+            bad.push(' no columns in row')
+          } else {
+            for (var col in row) {
+              if (typeof doc[col] == 'number' && isFinite(doc[col])) {
+                row[col] += doc[col];
+              } else if (doc[col]) {
+                bad.push(`${col} == ${doc[col]}`);
+              } else {
+                bad.push(`${col} == unknown`);
+              }
             }
           }
           if (bad.length > 0) {
-            console.warn(time + ':' + bad);
+            console.warn(time + ': ' + bad.join(', '));
           }
           num++;
         }
@@ -153,7 +160,7 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
       }
     }
   }, function(err) {
-    db.close();
+    client.close();
       
     if (err) {
       cb(err);
@@ -178,7 +185,7 @@ var toRickshaw = function(db, cursor, duration, units, res, cb) {
   });
 };
 
-var toCSV = function(db, cursor, duration, units, res, callback) {
+var toCSV = function(client, cursor, duration, units, res, callback) {
   // creates a csv file
   
   var csv = '';
@@ -225,7 +232,7 @@ var toCSV = function(db, cursor, duration, units, res, callback) {
       }
     }
   }, function(err) {
-    db.close();
+    client.close();
 
     if (err) {
       callback(err);
@@ -278,15 +285,16 @@ var getLatest = function(dgm, callback) {
   // Gets the last set of data from the database
   
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if (err) {
       callback(err);
     } else {
+      const db = client.db(dbname);
       var collection = db.collection(cleanDGM(dgm));
     
       // get the time of the newest datapoint in the database
-      collection.find().sort({time: -1}).limit(1).nextObject(function(err, item) {
-        db.close();
+      collection.find().sort({time: -1}).limit(1).next(function(err, item) {
+        client.close();
         callback(err, item);
       });
     }
@@ -385,19 +393,20 @@ var getRecent = function(dgm, elapsed, desired, processor, cb, res) {
   desired = (desired === undefined) ? [] : desired;
   
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if (err) { 
       cb(err);
       return;
     }
     
+    const db = client.db(dbname);
     var collection = db.collection(cleanDGM(dgm));
 
     async.waterfall([ function(callback) {
       getProjectionAndUnits(db, dgm, desired, callback);
     }, function(projection, units, callback) {
       // get the time of the newest datapoint in the database
-      collection.find().sort({time: -1}).limit(1).nextObject(function(err, item) {
+      collection.find().sort({time: -1}).limit(1).next(function(err, item) {
         if (!err && item) {
           callback(null, item.time, projection, units);
         } else {
@@ -441,7 +450,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb, res) {
             }
             );
         } else {
-          cursor = collection.find({ time: { $gt: start }}, projection);
+          cursor = collection.find({ time: { $gt: start }}).project(projection);
           cursor.sort({time: 1});
         }
       } else {
@@ -449,7 +458,7 @@ var getRecent = function(dgm, elapsed, desired, processor, cb, res) {
         cursor.sort({time: 1});
       }
       
-      callback(null, db, cursor, elapsed, units, res);
+      callback(null, client, cursor, elapsed, units, res);
     }, processor
     ], cb);
   });
@@ -499,12 +508,13 @@ var getRange = function(dgm, start, end, desired, processor, cb, res) {
   desired = (desired === undefined) ? [] : desired;
   
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
     if (err) { 
       cb(err);
       return;
     }
     
+    const db = client.db(dbname);
     var collection = db.collection(cleanDGM(dgm));
 
     async.waterfall([
@@ -544,7 +554,7 @@ var getRange = function(dgm, start, end, desired, processor, cb, res) {
               }
               );
           } else {
-            cursor = collection.find({ time: { $lte: end, $gt: start }}, projection);
+            cursor = collection.find({ time: { $lte: end, $gt: start }}).project(projection);
             cursor.sort({time: 1});
           }
         } else {
@@ -552,7 +562,7 @@ var getRange = function(dgm, start, end, desired, processor, cb, res) {
           cursor.sort({time: 1});
         }
         
-        callback(null, db, cursor, duration, units, res);
+        callback(null, client, cursor, duration, units, res);
       }, processor
     ], cb);
   });
@@ -671,14 +681,15 @@ var generateCSV = function(dgms, variables, method, res, cb) {
 
 var upload = function(dgm, file, callback) {
   /* Connect to the DB and auth */
-  MongoClient.connect(mongourl, function(err, db) {
+  MongoClient.connect(mongourl, function(err, client) {
 
     if (err) {
       callback(err);
       return;
     }
 
-    db.collection(cleanDGM(dgm), function(err, collection) {
+    const db = client.db(dbname);
+    client.collection(cleanDGM(dgm), function(err, collection) {
 
       if (err) {
         callback(err);

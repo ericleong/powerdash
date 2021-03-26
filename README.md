@@ -8,7 +8,7 @@ Setup
 
 ### Requirements
 
-* [node.js](https://nodejs.org/) - 0.12.x
+* [node.js](https://nodejs.org/) - 14.x
 * [mongodb](https://www.mongodb.org/)
 
 ### Install
@@ -68,7 +68,8 @@ $ mongod
 If you want to connect to a remote database, 
 
 1. Set the `NODE_ENV` environment variable to `production`
-2. Set the `MONGOLAB_URI` environment variable to the url of the database server.
+2. Set the `MONGOLAB_URI` environment variable to the url of the database server
+3. Set the `MONGOLAB_DB` environment variable to the name of the database
 
 #### Optional Configuration
 
@@ -464,7 +465,7 @@ Libraries
 
 ### Backend
 
-* [express](http://expressjs.com/) as a server-side framework and template rendering via [jade](http://jade-lang.com/)
+* [express](http://expressjs.com/) as a server-side framework and template rendering via [pug](https://pugjs.org/)
 * [moment](http://momentjs.com/) to parse and render time information
 * [socket.io](http://socket.io/) to stream updates to the browser
 * [node-ntlm-auth](https://github.com/ericleong/node-ntlm-auth) for NTLM authentication

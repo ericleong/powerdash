@@ -3,7 +3,6 @@ var BufferList = require('bufferlist').BufferList;
 var Binary = require('bufferlist/binary').Binary;
 var modbus = require('./modbus-stack');
 var netStream = require('net').Stream;
-var FUNCTION_CODES = modbus.FUNCTION_CODES;
 
 /* TCP MODBUS Client interface, as it's the most usual use-case. */
 function Client () {
