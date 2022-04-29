@@ -4,7 +4,7 @@
   "description": "a real time energy dashboard",
   "main": "app.js",
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.6.4",
     "bufferlist": "^0.1.0",
     "connect-multiparty": "^2.0.0",
     "express": "^4.17.1",
