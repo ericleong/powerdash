@@ -31,7 +31,7 @@ var generate_mongo_url = function(obj) {
     obj = {};
   }
 
-  obj.hostname = (obj.hostname || 'localhost');
+  obj.hostname = (obj.hostname || '127.0.0.1');
   obj.port = (obj.port || 27017);
   obj.db = (obj.db || getMongoDbName());
   if (obj.username && obj.password) {
