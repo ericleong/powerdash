@@ -120,7 +120,12 @@ app.get('/water', function(req, res) {
 
   api.getLatest(dgm, function(err, results) {
     if (err) {
-      res.status(500).send(err);
+      res.render('save', {
+        dgm: dgm,
+        setname: 'Water Saved',
+        variables: variables,
+        latest: 0
+      });
     } else {
       res.render('save', {
         dgm: dgm,
