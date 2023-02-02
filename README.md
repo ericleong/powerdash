@@ -330,7 +330,13 @@ The data is then parsed with _xml2js_. The `savedAt` attribute is parsed using _
 
 ### Storing Data
 
-Data is stored in mongodb, a NoSQL document database. Data is stored in the `energydata` database inside the connected mongodb instance. The database consists of a set of "collections", each of which contains a series of "documents". 
+Data is stored in mongodb, a NoSQL document database. The database consists of a set of "collections", each of which contains a series of "documents".
+
+#### Configuring MongoDB
+
+By default, this application connects to a MongoDB instance at `localhost:27017` and the database named `powerdash`. If a different database location is desired, set the `MONGODB_ATLAS_URI` and `MONGODB_ATLAS_DB` environment variables to point to the respective MongoDB instance and database name. Also set as `NODE_ENV` to `production` to make sure the mentioned environment variables are checked first.
+
+#### Storage Format
 
 For Modbus queries, the `name` specified in `auth.json` is used as the name of the collection.
 
