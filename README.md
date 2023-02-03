@@ -8,7 +8,7 @@ Setup
 
 ### Requirements
 
-* [node.js](https://nodejs.org/) - 14.x
+* [node.js](https://nodejs.org/) - 18.x
 * [mongodb](https://www.mongodb.org/)
 
 ### Install
